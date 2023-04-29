@@ -5,8 +5,6 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-// run it with ERC20
-
 contract Escrow is Ownable, AccessControl, ReentrancyGuard {
     uint8 public agentFeePercentage;
     uint public withdrawableFunds;
@@ -157,8 +155,8 @@ contract Escrow is Ownable, AccessControl, ReentrancyGuard {
             "Not enough ETH in withdrawable funds"
         );
         payable(owner()).transfer(withdrawableFunds);
-        withdrawableFunds = 0;
         emit FundsWithdrawn(withdrawableFunds);
+        withdrawableFunds = 0;
     }
 
     function addAgent(address _agent) external onlyOwner {
