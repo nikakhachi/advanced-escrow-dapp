@@ -12,6 +12,7 @@ contract Escrow is Ownable, AccessControl, ReentrancyGuard {
     bytes32 public constant AGENT_ROLE = keccak256("AGENT_ROLE");
 
     constructor(uint8 _agentFeePercentage) {
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         grantRole(AGENT_ROLE, msg.sender);
         agentFeePercentage = _agentFeePercentage;
     }
