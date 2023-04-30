@@ -1,6 +1,7 @@
 import { FC, useContext } from "react";
 import { EscrowAgentContext } from "../contexts/EscrowAgentContext";
 import { EscrowStatus, EscrowType } from "../types";
+import { Role } from "../types/enums";
 import { shortenAddress } from "../utils";
 
 interface EscrowCardProps {
@@ -24,20 +25,24 @@ export const EscrowCard: FC<EscrowCardProps> = ({ escrow }) => {
       <div className="px-6 pt-4 pb-2">
         {escrow.status === EscrowStatus.PENDNG_PAYMENT && (
           <>
-            <button className={actionButtonClassName} onClick={() => escrowAgentContext?.archiveEscrow(escrow.id)}>
-              Archive
-            </button>
-            <button
-              className={actionButtonClassName}
-              onClick={() =>
-                escrowAgentContext?.depositEscrow(escrow.id, escrow.amount + (escrow.amount * escrow.agentFeePercentage) / 100)
-              }
-            >
-              Deposit
-            </button>
+            {escrowAgentContext?.role !== Role.VISITOR && (
+              <button className={actionButtonClassName} onClick={() => escrowAgentContext?.archiveEscrow(escrow.id)}>
+                Archive
+              </button>
+            )}
+            {escrowAgentContext?.metamaskAccount.toUpperCase() === escrow.buyer.toUpperCase() && (
+              <button
+                className={actionButtonClassName}
+                onClick={() =>
+                  escrowAgentContext?.depositEscrow(escrow.id, escrow.amount + (escrow.amount * escrow.agentFeePercentage) / 100)
+                }
+              >
+                Deposit
+              </button>
+            )}
           </>
         )}
-        {escrow.status === EscrowStatus.PENDING_APPROVAL && (
+        {escrow.status === EscrowStatus.PENDING_APPROVAL && escrowAgentContext?.role !== Role.VISITOR ? (
           <>
             <button className={actionButtonClassName} onClick={() => escrowAgentContext?.cancelEscrow(escrow.id)}>
               Cancel
@@ -46,7 +51,7 @@ export const EscrowCard: FC<EscrowCardProps> = ({ escrow }) => {
               Approve
             </button>
           </>
-        )}
+        ) : null}
       </div>
     </div>
   );

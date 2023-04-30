@@ -251,7 +251,8 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
   const depositEscrow = async (escrowId: number, depositAmountInETH: number) => {
     try {
       const contract = getContract(getSigner());
-      const txn = await contract.depositEscrow(escrowId, { value: ethers.utils.parseEther(depositAmountInETH.toFixed(18)) });
+      const amount = String(depositAmountInETH).length > 18 ? depositAmountInETH.toFixed(18) : String(depositAmountInETH);
+      const txn = await contract.depositEscrow(escrowId, { value: ethers.utils.parseEther(amount) });
       await txn.wait();
     } catch (error: any) {
       console.error(error);
