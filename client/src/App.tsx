@@ -25,7 +25,6 @@ function App() {
       ) : (
         <>
           <HomeView />
-          {escrowAgentContext.isMining && <MiningView />}
         </>
       )}
     </div>
