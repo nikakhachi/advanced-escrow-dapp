@@ -8,7 +8,7 @@ describe("Escrow", function () {
   async function deployEscrowFixture() {
     const [owner, acc1, acc2, acc3, acc4, acc5] = await ethers.getSigners();
 
-    const Contract = await ethers.getContractFactory("Escrow");
+    const Contract = await ethers.getContractFactory("EscrowAgent");
     const contract = await Contract.deploy(INITIAL_AGENT_FEE_PERCENTAGE);
 
     return { contract, owner, acc1, acc2, acc3, acc4, acc5 };
