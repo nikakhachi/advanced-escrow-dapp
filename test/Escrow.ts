@@ -83,4 +83,36 @@ describe("Escrow", function () {
       await expect(contract.connect(acc1).revokeAgent(acc2.address)).to.revertedWith("Ownable: caller is not the owner");
     });
   });
+
+  describe("Agents Apply/Add/Revoke", function () {
+    it("General Flow", async function () {
+      const { contract, acc3, acc4 } = await loadFixture(deployEscrowFixture);
+
+      expect((await contract.getAgents()).length).to.equal(0);
+
+      await contract.connect(acc3).applyForAgent();
+      expect((await contract.getAgents()).length).to.equal(0);
+
+      expect((await contract.getAgentsWaitlist()).length).to.equal(1);
+      expect((await contract.getAgentsWaitlist())[0]).to.equal(acc3.address);
+
+      await contract.addAgent(acc3.address);
+
+      expect((await contract.getAgents()).length).to.equal(1);
+      expect((await contract.getAgents())[0]).to.equal(acc3.address);
+      expect((await contract.getAgentsWaitlist()).length).to.equal(0);
+
+      await contract.addAgent(acc4.address);
+
+      expect((await contract.getAgents()).length).to.equal(2);
+      expect((await contract.getAgents())[1]).to.equal(acc4.address);
+      expect((await contract.getAgentsWaitlist()).length).to.equal(0);
+
+      await contract.revokeAgent(acc3.address);
+
+      expect((await contract.getAgents()).length).to.equal(1);
+      expect((await contract.getAgents())[0]).to.equal(acc4.address);
+      expect((await contract.getAgentsWaitlist()).length).to.equal(0);
+    });
+  });
 });

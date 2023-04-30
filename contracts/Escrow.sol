@@ -12,10 +12,13 @@ contract Escrow is Ownable, AccessControl, ReentrancyGuard {
     bytes32 public constant AGENT_ROLE = keccak256("AGENT_ROLE");
 
     constructor(uint8 _agentFeePercentage) {
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         grantRole(AGENT_ROLE, msg.sender);
         agentFeePercentage = _agentFeePercentage;
     }
+
+    address[] public agentWaitlist;
+    address[] public agents;
 
     event EscrowInitiated(EscrowDocument escrowDocument);
     event EscrowPaid(uint escrowId, uint timestamp);
@@ -161,12 +164,64 @@ contract Escrow is Ownable, AccessControl, ReentrancyGuard {
     }
 
     function addAgent(address _agent) external onlyOwner {
+        require(
+            !_addressArrayContains(agents, _agent),
+            "Address is already an agent"
+        );
+        if (_addressArrayContains(agentWaitlist, _agent)) {
+            for (uint i = 0; i < agentWaitlist.length; i++) {
+                if (agentWaitlist[i] == _agent) {
+                    agentWaitlist[i] = agentWaitlist[agentWaitlist.length - 1];
+                    agentWaitlist.pop();
+                }
+            }
+        }
         grantRole(AGENT_ROLE, _agent);
+        agents.push(_agent);
         emit AgentAdded(_agent);
     }
 
     function revokeAgent(address _agent) external onlyOwner {
         revokeRole(AGENT_ROLE, _agent);
+        for (uint i = 0; i < agents.length; i++) {
+            if (agents[i] == _agent) {
+                agents[i] = agents[agents.length - 1];
+                agents.pop();
+            }
+        }
         emit AgentRevoked(_agent);
+    }
+
+    function applyForAgent() external nonReentrant {
+        require(msg.sender != owner(), "Owner can't ask for becoming an agent");
+        require(
+            !_addressArrayContains(agentWaitlist, msg.sender),
+            "Address is already in an agent whitelist"
+        );
+        require(
+            !_addressArrayContains(agents, msg.sender),
+            "Address is already an agent"
+        );
+        agentWaitlist.push(msg.sender);
+    }
+
+    function getAgents() public view returns (address[] memory) {
+        return agents;
+    }
+
+    function getAgentsWaitlist() public view returns (address[] memory) {
+        return agentWaitlist;
+    }
+
+    function _addressArrayContains(
+        address[] memory _array,
+        address _address
+    ) private pure returns (bool) {
+        for (uint i = 0; i < _array.length; i++) {
+            if (_array[i] == _address) {
+                return true;
+            }
+        }
+        return false;
     }
 }
