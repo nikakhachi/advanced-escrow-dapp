@@ -10,4 +10,5 @@
 body {
   padding-bottom: 5rem;
   overflow-x: hidden;
+  overflow-y: hidden;
 }

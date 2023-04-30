@@ -13,6 +13,6 @@ export const LoadingView = () => (
       alignItems: "center",
     }}
   >
-    <CircularProgress />
+    <CircularProgress color="inherit" />
   </div>
 );

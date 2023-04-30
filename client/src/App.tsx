@@ -11,7 +11,12 @@ function App() {
   const escrowAgentContext = useContext(EscrowAgentContext);
 
   return (
-    <div>
+    <div className="bg-black h-screen text-white">
+      <div className="w-full justify-center flex pt-24 pb-12">
+        <p className="text-4xl font-semibold text-white">
+          <span className="text-[#00d395]">Escrow</span> Application
+        </p>
+      </div>
       {!escrowAgentContext?.metamaskWallet ? (
         <NoMetamaskView />
       ) : escrowAgentContext?.isLoading ? (
@@ -23,9 +28,7 @@ function App() {
       ) : escrowAgentContext.isNetworkGoerli === false ? (
         <InvalidNetworkView />
       ) : (
-        <>
-          <HomeView />
-        </>
+        <></>
       )}
     </div>
   );
