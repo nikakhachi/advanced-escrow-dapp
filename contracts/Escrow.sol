@@ -66,6 +66,16 @@ contract Escrow is Ownable, AccessControl, ReentrancyGuard {
         address _seller,
         uint _amount
     ) external onlyRole(AGENT_ROLE) nonReentrant {
+        require(!_addressArrayContains(agents, _buyer), "Buyer is an agent");
+        require(!_addressArrayContains(agents, _seller), "Seller is an agent");
+        require(
+            !_addressArrayContains(agentWaitlist, _buyer),
+            "Buyer is in an agent waitlist"
+        );
+        require(
+            !_addressArrayContains(agentWaitlist, _seller),
+            "Seller is in an agent waitlist"
+        );
         EscrowDocument memory escrow = EscrowDocument(
             escrows.length,
             _buyer,
@@ -90,8 +100,9 @@ contract Escrow is Ownable, AccessControl, ReentrancyGuard {
             escrow.status == EscrowStatus.PENDNG_PAYMENT,
             "Escrow is not accepting payments"
         );
+        uint feeForAgent = (escrow.amount * escrow.agentFeePercentage) / 100;
         require(
-            escrow.amount * (escrow.agentFeePercentage / 100 + 1) == msg.value,
+            escrow.amount + feeForAgent == msg.value,
             "Deposit must be equal to amount including the agent fee"
         );
         escrow.status = EscrowStatus.PENDING_APPROVAL;
