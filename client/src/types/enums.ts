@@ -5,3 +5,9 @@ export enum EscrowStatus {
   REJECTED,
   ARCHIVED,
 }
+
+export enum Role {
+  OWNER,
+  AGENT,
+  VISITOR,
+}

@@ -4,6 +4,7 @@ import { CONTRACT_ADDRESS } from "../constants";
 import CONTRACT_JSON from "../constants/EscrowAgentContract.json";
 import { EscrowType } from "../types";
 import { SnackbarContext } from "./SnackbarContext";
+import { Role } from "../types/enums";
 
 type EscrowAgentContextType = {
   metamaskWallet: any;
@@ -28,6 +29,10 @@ type EscrowAgentContextType = {
   approveEscrow: (escrowId: number) => Promise<void>;
   depositEscrow: (escrowId: number, depositAmountInETH: number) => Promise<void>;
   withdrawFunds: (amount: number) => Promise<void>;
+  applyAsAnAgent: () => Promise<void>;
+  addAgent: (address: string) => Promise<void>;
+  revokeAgent: (address: string) => Promise<void>;
+  role: Role;
 };
 
 let metamaskWallet: ethers.providers.ExternalProvider | undefined;
@@ -53,6 +58,8 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
   const [agents, setAgents] = useState<string[]>([]);
   const [agentsWaitlist, setAgentsWaitlist] = useState<string[]>([]);
 
+  const [role, setRole] = useState<Role>(Role.VISITOR);
+
   useEffect(() => {
     (async () => {
       const account = await findMetaMaskAccount();
@@ -72,6 +79,20 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      if (metamaskAccount) {
+        console.log("UPDATING ROLE");
+        const contract = getContract(getSigner());
+        const owner = await contract.owner();
+        if (owner.toUpperCase() === metamaskAccount.toUpperCase()) return setRole(Role.OWNER);
+        if (agents.find((agent) => agent.toUpperCase() === metamaskAccount.toUpperCase())) return setRole(Role.AGENT);
+        setRole(Role.VISITOR);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [metamaskAccount, escrows.length]);
 
   const findMetaMaskAccount = async () => {
     try {
@@ -252,6 +273,39 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
     }
   };
 
+  const applyAsAnAgent = async () => {
+    try {
+      const contract = getContract(getSigner());
+      const txn = await contract.applyForAgent();
+      await txn.wait();
+    } catch (error: any) {
+      console.error(error);
+      snackbarContext?.open("Error", "error");
+    }
+  };
+
+  const addAgent = async (address: string) => {
+    try {
+      const contract = getContract(getSigner());
+      const txn = await contract.addAgent(address);
+      await txn.wait();
+    } catch (error: any) {
+      console.error(error);
+      snackbarContext?.open("Error", "error");
+    }
+  };
+
+  const revokeAgent = async (address: string) => {
+    try {
+      const contract = getContract(getSigner());
+      const txn = await contract.revokeAgent(address);
+      await txn.wait();
+    } catch (error: any) {
+      console.error(error);
+      snackbarContext?.open("Error", "error");
+    }
+  };
+
   const value = {
     metamaskWallet,
     metamaskAccount,
@@ -275,6 +329,10 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
     approveEscrow,
     depositEscrow,
     withdrawFunds,
+    applyAsAnAgent,
+    addAgent,
+    revokeAgent,
+    role,
   };
 
   return <EscrowAgentContext.Provider value={value}>{children}</EscrowAgentContext.Provider>;
