@@ -16,12 +16,8 @@ export const EscrowCard: FC<EscrowCardProps> = ({ escrow }) => {
     <div className="max-w-sm rounded overflow-hidden shadow-lg border-x border-y border-[#00d395]">
       <div className="px-6 py-4">
         <div className="font-bold text-xl mb-2">Status: {EscrowStatus[escrow.status]}</div>
-        <p className="text-gray-600 text-base">
-          Buyer: {escrow.buyer} {shortenAddress(escrow.buyer)}
-        </p>
-        <p className="text-gray-600 text-base">
-          Seller: {escrow.seller} {shortenAddress(escrow.seller)}
-        </p>
+        <p className="text-gray-600 text-base">Buyer: {shortenAddress(escrow.buyer)}</p>
+        <p className="text-gray-600 text-base">Seller: {shortenAddress(escrow.seller)}</p>
         <p className="text-gray-600 text-base">Amount: {escrow.amount}</p>
         <p className="text-gray-600 text-base">Agent Fee: {escrow.agentFeePercentage}%</p>
       </div>
