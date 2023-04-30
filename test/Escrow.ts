@@ -6,12 +6,12 @@ const INITIAL_AGENT_FEE_PERCENTAGE = 10;
 
 describe("Escrow", function () {
   async function deployEscrowFixture() {
-    const [owner, acc1, acc2, acc3, acc4] = await ethers.getSigners();
+    const [owner, acc1, acc2, acc3, acc4, acc5] = await ethers.getSigners();
 
     const Contract = await ethers.getContractFactory("Escrow");
     const contract = await Contract.deploy(INITIAL_AGENT_FEE_PERCENTAGE);
 
-    return { contract, owner, acc1, acc2, acc3, acc4 };
+    return { contract, owner, acc1, acc2, acc3, acc4, acc5 };
   }
 
   describe("Deployment", function () {
@@ -113,6 +113,64 @@ describe("Escrow", function () {
       expect((await contract.getAgents()).length).to.equal(1);
       expect((await contract.getAgents())[0]).to.equal(acc4.address);
       expect((await contract.getAgentsWaitlist()).length).to.equal(0);
+    });
+  });
+
+  describe("Escrow", function () {
+    it("General Flow", async function () {
+      const { contract, acc1, acc2, acc3, acc4, acc5 } = await loadFixture(deployEscrowFixture);
+
+      await contract.addAgent(acc4.address);
+      await contract.connect(acc5).applyForAgent();
+
+      await contract.connect(acc4).initiateEscrow(acc1.address, acc2.address, ethers.utils.parseEther("2.5"));
+
+      expect((await contract.getAllEscrows()).length).to.equal(1);
+
+      await expect(contract.connect(acc4).initiateEscrow(acc4.address, acc2.address, ethers.utils.parseEther("2.5"))).to.revertedWith(
+        "Buyer is an agent"
+      );
+      await expect(contract.connect(acc4).initiateEscrow(acc2.address, acc4.address, ethers.utils.parseEther("2.5"))).to.revertedWith(
+        "Seller is an agent"
+      );
+      await expect(contract.connect(acc4).initiateEscrow(acc5.address, acc2.address, ethers.utils.parseEther("2.5"))).to.revertedWith(
+        "Buyer is in an agent waitlist"
+      );
+      await expect(contract.connect(acc4).initiateEscrow(acc2.address, acc5.address, ethers.utils.parseEther("2.5"))).to.revertedWith(
+        "Seller is in an agent waitlist"
+      );
+
+      expect((await contract.getEscrowById(0)).status).to.eq(0);
+      await expect(contract.connect(acc2).depositEscrow(0)).to.revertedWith("Only buyer should deposit into an escrow");
+
+      await expect(contract.connect(acc1).depositEscrow(0, { value: ethers.utils.parseEther("2.8") })).to.revertedWith(
+        "Deposit must be equal to amount including the agent fee"
+      );
+      await expect(contract.connect(acc1).depositEscrow(0, { value: ethers.utils.parseEther("2.7") })).to.revertedWith(
+        "Deposit must be equal to amount including the agent fee"
+      );
+
+      await contract.connect(acc1).depositEscrow(0, { value: ethers.utils.parseEther("2.75") });
+      expect((await contract.getEscrowById(0)).status).to.eq(1);
+
+      await expect(contract.archiveEscrow(0)).to.revertedWith("Can't archive active Escrow");
+
+      const buyerBalanceAfterDepositing = Number(ethers.utils.formatEther(await acc1.getBalance()));
+
+      await contract.cancelEscrow(0);
+      expect((await contract.getEscrowById(0)).status).to.eq(3);
+
+      const buyerBalanceAfterCanciling = Number(ethers.utils.formatEther(await acc1.getBalance()));
+      expect(buyerBalanceAfterCanciling - buyerBalanceAfterDepositing).to.eq(2.5);
+
+      await contract.connect(acc4).initiateEscrow(acc2.address, acc3.address, ethers.utils.parseEther("2.5"));
+      await contract.connect(acc4).archiveEscrow(1);
+      expect((await contract.getEscrowById(1)).status).to.eq(4);
+
+      await contract.connect(acc4).initiateEscrow(acc2.address, acc3.address, ethers.utils.parseEther("2.5"));
+      await contract.connect(acc2).depositEscrow(2, { value: ethers.utils.parseEther("2.75") });
+      await contract.connect(acc4).ApproveEscrow(2);
+      expect((await contract.getEscrowById(2)).status).to.eq(2);
     });
   });
 });
