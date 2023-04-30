@@ -12,6 +12,7 @@ export const HomeView = () => {
     escrowAgentContext?.getWithdrawableFunds();
     escrowAgentContext?.getAgents();
     escrowAgentContext?.getAgentsWaitlist();
+    escrowAgentContext?.setEventHandlers();
   }, []);
 
   return escrowAgentContext ? (

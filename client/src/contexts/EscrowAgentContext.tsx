@@ -1,8 +1,8 @@
 import { createContext, useState, PropsWithChildren, useEffect, useContext } from "react";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { CONTRACT_ADDRESS } from "../constants";
 import CONTRACT_JSON from "../constants/EscrowAgentContract.json";
-import { EscrowType } from "../types";
+import { EscrowStatus, EscrowType } from "../types";
 import { SnackbarContext } from "./SnackbarContext";
 import { Role } from "../types/enums";
 
@@ -33,6 +33,8 @@ type EscrowAgentContextType = {
   addAgent: (address: string) => Promise<void>;
   revokeAgent: (address: string) => Promise<void>;
   role: Role;
+  setEventHandlers: () => void;
+  updateAgentFeePercentage: (amount: number) => Promise<void>;
 };
 
 let metamaskWallet: ethers.providers.ExternalProvider | undefined;
@@ -250,7 +252,7 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
   const depositEscrow = async (escrowId: number, depositAmountInETH: number) => {
     try {
       const contract = getContract(getSigner());
-      const txn = await contract.depositEscrow(escrowId, { value: ethers.utils.parseEther(String(depositAmountInETH)) });
+      const txn = await contract.depositEscrow(escrowId, { value: ethers.utils.parseEther(depositAmountInETH.toFixed(18)) });
       await txn.wait();
     } catch (error: any) {
       console.error(error);
@@ -306,6 +308,90 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
     }
   };
 
+  const updateAgentFeePercentage = async (amount: number) => {
+    try {
+      const contract = getContract(getSigner());
+      const txn = await contract.changeAgentFeePercentage(amount);
+      await txn.wait();
+    } catch (error: any) {
+      console.error(error);
+      snackbarContext?.open("Error", "error");
+    }
+  };
+
+  const setEventHandlers = () => {
+    const contract = getContract(getSigner());
+    contract.provider.once("block", () => {
+      contract.on("EscrowInitiated", (escrow: EscrowType) => {
+        setEscrows((prevState) =>
+          [
+            {
+              seller: escrow.seller,
+              buyer: escrow.buyer,
+              id: escrow.id,
+              amount: Number(ethers.utils.formatEther(escrow.amount)),
+              status: escrow.status,
+              agentFeePercentage: escrow.agentFeePercentage,
+              description: escrow.description,
+              createdAt: new Date((escrow.createdAt as any).toNumber() * 1000),
+              updatedAt: new Date((escrow.createdAt as any).toNumber() * 1000),
+            },
+            ...prevState,
+          ].sort((a: EscrowType, b: EscrowType) => b.updatedAt.valueOf() - a.updatedAt.valueOf())
+        );
+        snackbarContext?.open("New Escrow has been created", "success");
+      });
+      const escrowStatusChangeHandler = async (id: BigNumber, timestamp: BigNumber, status: EscrowStatus) => {
+        setEscrows((prevState) =>
+          prevState
+            .map((escrow) => {
+              if (escrow.id === id.toNumber()) {
+                return { ...escrow, status, updatedAt: new Date(timestamp.toNumber() * 1000) };
+              }
+              return escrow;
+            })
+            .sort((a: EscrowType, b: EscrowType) => b.updatedAt.valueOf() - a.updatedAt.valueOf())
+        );
+        if (status === EscrowStatus.APPROVED) {
+          const withdrawableFundsRes = await contract.withdrawableFunds();
+          setWithdrawableFunds(Number(ethers.utils.formatEther(withdrawableFundsRes)));
+        }
+      };
+      contract.on("EscrowPaid", (id: BigNumber, timestamp: BigNumber) => {
+        escrowStatusChangeHandler(id, timestamp, EscrowStatus.PENDING_APPROVAL);
+        snackbarContext?.open("Escrow Deposited", "info");
+      });
+      contract.on("EscrowApproved", (id: BigNumber, timestamp: BigNumber) => {
+        escrowStatusChangeHandler(id, timestamp, EscrowStatus.APPROVED);
+        snackbarContext?.open("Escrow Approved", "info");
+      });
+      contract.on("EscrowCanceled", (id: BigNumber, timestamp: BigNumber) => {
+        escrowStatusChangeHandler(id, timestamp, EscrowStatus.CANCELED);
+        snackbarContext?.open("Escrow Canceled", "info");
+      });
+      contract.on("EscrowArchived", (id: BigNumber, timestamp: BigNumber) => {
+        escrowStatusChangeHandler(id, timestamp, EscrowStatus.ARCHIVED);
+        snackbarContext?.open("Escrow Achived", "info");
+      });
+      contract.on("FundsWithdrawn", (amount: BigNumber) => {
+        setWithdrawableFunds((s) => s - amount.toNumber());
+        snackbarContext?.open("Funds withdraw", "info");
+      });
+      contract.on("AgentFeePercentageUpdated", (newAgentFeePercentage: number) => {
+        setAgentFeePercentage(newAgentFeePercentage);
+        snackbarContext?.open("Agent fee percentage updated", "info");
+      });
+      contract.on("AgentAdded", (address: string) => {
+        setAgents((arr) => [...arr, address]);
+        snackbarContext?.open("Agent added", "info");
+      });
+      contract.on("AgentRevoked", (address: string) => {
+        setAgents((arr) => arr.filter((item) => item.toUpperCase() !== address.toUpperCase()));
+        snackbarContext?.open("Agent Revoked", "info");
+      });
+    });
+  };
+
   const value = {
     metamaskWallet,
     metamaskAccount,
@@ -333,6 +419,8 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
     addAgent,
     revokeAgent,
     role,
+    setEventHandlers,
+    updateAgentFeePercentage,
   };
 
   return <EscrowAgentContext.Provider value={value}>{children}</EscrowAgentContext.Provider>;

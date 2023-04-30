@@ -6,6 +6,7 @@ import { AgentsListDialog } from "./AgentsListDialog";
 import { ApplyingAsAgentDialog } from "./ApplyingAsAgentDialog";
 import { InitiateEscrowDialog } from "./InitiateEscrowDialog";
 import { RevokeAgentDialog } from "./RevokeAgentDialog";
+import { UpdateAgentFeePercentage } from "./UpdateAgentFeePercentageDialog";
 import { WithdrawFundsDialog } from "./WithdrawFundsDialog";
 
 interface FunctionButtonsProps {}
@@ -20,6 +21,7 @@ export const FunctionButtons: FC<FunctionButtonsProps> = () => {
   const [agentsWaitlistDialogOpen, setAgentsWaitlistDialogOpen] = useState(false);
   const [addAgentDialogOpen, setAddAgentDialogOpen] = useState(false);
   const [revokeAgentDialogOpen, setRevokeAgentDialogOpen] = useState(false);
+  const [updateAgentFeeDialogOpen, setUpdateAgentFeeDialogOpen] = useState(false);
 
   const handleClose = () => {
     setInitiateEscrowDialogOpen(false);
@@ -29,6 +31,7 @@ export const FunctionButtons: FC<FunctionButtonsProps> = () => {
     setAgentsListDialogOpen(false);
     setAddAgentDialogOpen(false);
     setRevokeAgentDialogOpen(false);
+    setUpdateAgentFeeDialogOpen(false);
   };
 
   return (
@@ -59,6 +62,12 @@ export const FunctionButtons: FC<FunctionButtonsProps> = () => {
                 className="text-lg border-2 border-[#00d395] px-8 py-2 rounded-2xl mr-2"
               >
                 Withdraw Funds
+              </button>
+              <button
+                onClick={() => setUpdateAgentFeeDialogOpen(true)}
+                className="text-lg border-2 border-[#00d395] px-8 py-2 rounded-2xl mr-2"
+              >
+                Update Agent Fee
               </button>
             </>
           )}
@@ -98,6 +107,7 @@ export const FunctionButtons: FC<FunctionButtonsProps> = () => {
         />
         <AddAgentDialog open={addAgentDialogOpen} handleClose={handleClose} />
         <RevokeAgentDialog open={revokeAgentDialogOpen} handleClose={handleClose} />
+        <UpdateAgentFeePercentage open={updateAgentFeeDialogOpen} handleClose={handleClose} />
       </>
     )
   );
