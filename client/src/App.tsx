@@ -4,7 +4,6 @@ import { ConnectMetamaskView } from "./views/ConnectMetamaskView";
 import { HomeView } from "./views/HomeView";
 import { InvalidNetworkView } from "./views/InvalidNetworkView";
 import { LoadingView } from "./views/LoadingView";
-import MiningView from "./views/MiningView";
 import { NoMetamaskView } from "./views/NoMetamaskView";
 
 function App() {
@@ -28,7 +27,7 @@ function App() {
       ) : escrowAgentContext.isNetworkGoerli === false ? (
         <InvalidNetworkView />
       ) : (
-        <></>
+        <HomeView />
       )}
     </div>
   );

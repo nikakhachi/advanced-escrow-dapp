@@ -2,6 +2,8 @@ import { createContext, useState, PropsWithChildren, useEffect, useContext } fro
 import { ethers } from "ethers";
 import { CONTRACT_ADDRESS } from "../constants";
 import CONTRACT_JSON from "../constants/EscrowAgentContract.json";
+import { EscrowType } from "../types";
+import { SnackbarContext } from "./SnackbarContext";
 
 type EscrowAgentContextType = {
   metamaskWallet: any;
@@ -10,6 +12,22 @@ type EscrowAgentContextType = {
   isLoading: boolean;
   getSigner: () => ethers.providers.JsonRpcSigner;
   isNetworkGoerli: boolean | undefined;
+  getEscrows: () => Promise<void>;
+  getAgentFeePercentage: () => Promise<void>;
+  getWithdrawableFunds: () => Promise<void>;
+  getAgents: () => Promise<void>;
+  getAgentsWaitlist: () => Promise<void>;
+  escrows: EscrowType[];
+  agentFeePercentage: number;
+  withdrawableFunds: number;
+  agents: string[];
+  agentsWaitlist: string[];
+  initiateEscrow: (seller: string, buyer: string, depositAmountInETH: number) => Promise<void>;
+  archiveEscrow: (escrowId: number) => Promise<void>;
+  cancelEscrow: (escrowId: number) => Promise<void>;
+  approveEscrow: (escrowId: number) => Promise<void>;
+  depositEscrow: (escrowId: number, depositAmountInETH: number) => Promise<void>;
+  withdrawFunds: (amount: number) => Promise<void>;
 };
 
 let metamaskWallet: ethers.providers.ExternalProvider | undefined;
@@ -21,11 +39,19 @@ if (typeof window !== "undefined") {
 export const EscrowAgentContext = createContext<EscrowAgentContextType | null>(null);
 
 export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) => {
+  const snackbarContext = useContext(SnackbarContext);
+
   const [metamaskAccount, setMetamaskAccount] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
   const [contract, setContract] = useState<ethers.Contract>();
 
   const [isNetworkGoerli, setIsNetworkGoerli] = useState<boolean>();
+
+  const [escrows, setEscrows] = useState<EscrowType[]>([]);
+  const [agentFeePercentage, setAgentFeePercentage] = useState(0);
+  const [withdrawableFunds, setWithdrawableFunds] = useState(0);
+  const [agents, setAgents] = useState<string[]>([]);
+  const [agentsWaitlist, setAgentsWaitlist] = useState<string[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -115,6 +141,117 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
     return fetchedContract;
   };
 
+  const getEscrows = async () => {
+    const contract = getContract(getSigner());
+    const escrowsRaw = await contract.getAllEscrows();
+    const escrows: EscrowType[] = escrowsRaw
+      .map((item: any) => ({
+        seller: item.seller,
+        buyer: item.buyer,
+        id: item.id.toNumber(),
+        amount: Number(ethers.utils.formatEther(item.amount)),
+        status: item.status,
+        agentFeePercentage: item.agentFeePercentage,
+        description: item.description,
+        createdAt: new Date(item.createdAt.toNumber() * 1000),
+        updatedAt: new Date(item.updatedAt.toNumber() * 1000),
+      }))
+      .sort((a: EscrowType, b: EscrowType) => b.updatedAt.valueOf() - a.updatedAt.valueOf());
+    setEscrows(escrows);
+  };
+
+  const getAgentFeePercentage = async () => {
+    const contract = getContract(getSigner());
+    const agentFeePercentageRaw = await contract.agentFeePercentage();
+    setAgentFeePercentage(agentFeePercentageRaw);
+  };
+
+  const getWithdrawableFunds = async () => {
+    const contract = getContract(getSigner());
+    const withdrawableFundsRaw = await contract.withdrawableFunds();
+    setWithdrawableFunds(Number(ethers.utils.formatEther(withdrawableFundsRaw)));
+  };
+
+  const getAgents = async () => {
+    const contract = getContract(getSigner());
+    const agentsRaw = await contract.getAgents();
+    setAgents(agentsRaw);
+  };
+
+  const getAgentsWaitlist = async () => {
+    const contract = getContract(getSigner());
+    const agentsWaitlistRaw = await contract.getAgentsWaitlist();
+    setAgentsWaitlist(agentsWaitlistRaw);
+  };
+
+  const initiateEscrow = async (seller: string, buyer: string, depositAmountInETH: number) => {
+    try {
+      if (seller.toUpperCase() === buyer.toUpperCase()) return snackbarContext?.open("Buyer and Seller must be different", "error");
+      const contract = getContract(getSigner());
+      const txn = await contract.initiateEscrow(seller, buyer, ethers.utils.parseEther(String(depositAmountInETH)));
+      await txn.wait();
+    } catch (error) {
+      snackbarContext?.open("Error", "error");
+    }
+  };
+
+  const archiveEscrow = async (escrowId: number) => {
+    try {
+      const contract = getContract(getSigner());
+      const txn = await contract.archiveEscrow(escrowId);
+      await txn.wait();
+    } catch (error) {
+      snackbarContext?.open("Error", "error");
+    }
+  };
+
+  const cancelEscrow = async (escrowId: number) => {
+    try {
+      const contract = getContract(getSigner());
+      const txn = await contract.cancelEscrow(escrowId);
+      await txn.wait();
+    } catch (error) {
+      snackbarContext?.open("Error", "error");
+    }
+  };
+
+  const approveEscrow = async (escrowId: number) => {
+    try {
+      const contract = getContract(getSigner());
+      const txn = await contract.ApproveEscrow(escrowId);
+      await txn.wait();
+    } catch (error) {
+      console.error(error);
+      snackbarContext?.open("Error", "error");
+    }
+  };
+
+  const depositEscrow = async (escrowId: number, depositAmountInETH: number) => {
+    try {
+      const contract = getContract(getSigner());
+      const txn = await contract.depositEscrow(escrowId, { value: ethers.utils.parseEther(String(depositAmountInETH)) });
+      await txn.wait();
+    } catch (error: any) {
+      console.error(error);
+      const escrowBuyerAddress = escrows.find((item) => item.id === escrowId)?.buyer;
+      if (metamaskAccount?.toLowerCase() !== escrowBuyerAddress?.toLowerCase()) {
+        return snackbarContext?.open("You should be the buyer to deposit to the escrow", "error");
+      }
+      snackbarContext?.open("Error", "error");
+    }
+  };
+
+  const withdrawFunds = async (amount: number) => {
+    try {
+      const contract = getContract(getSigner());
+      const txn = await contract.withdrawFunds(ethers.utils.parseEther(String(amount)));
+      await txn.wait();
+    } catch (error: any) {
+      console.error(error);
+      snackbarContext?.open("Error", "error");
+    }
+  };
+
   const value = {
     metamaskWallet,
     metamaskAccount,
@@ -122,6 +259,22 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
     isLoading,
     getSigner,
     isNetworkGoerli,
+    getEscrows,
+    getAgentFeePercentage,
+    getWithdrawableFunds,
+    getAgents,
+    getAgentsWaitlist,
+    escrows,
+    agentFeePercentage,
+    withdrawableFunds,
+    agents,
+    agentsWaitlist,
+    initiateEscrow,
+    cancelEscrow,
+    archiveEscrow,
+    approveEscrow,
+    depositEscrow,
+    withdrawFunds,
   };
 
   return <EscrowAgentContext.Provider value={value}>{children}</EscrowAgentContext.Provider>;
