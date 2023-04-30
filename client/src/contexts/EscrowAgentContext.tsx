@@ -85,7 +85,6 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
   useEffect(() => {
     (async () => {
       if (metamaskAccount) {
-        console.log("UPDATING ROLE");
         const contract = getContract(getSigner());
         const owner = await contract.owner();
         if (owner.toUpperCase() === metamaskAccount.toUpperCase()) return setRole(Role.OWNER);
