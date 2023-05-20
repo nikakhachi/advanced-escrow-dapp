@@ -6,15 +6,6 @@ import { EscrowAgentContext } from "../contexts/EscrowAgentContext";
 export const HomeView = () => {
   const escrowAgentContext = useContext(EscrowAgentContext);
 
-  useEffect(() => {
-    escrowAgentContext?.getEscrows();
-    escrowAgentContext?.getAgentFeePercentage();
-    escrowAgentContext?.getWithdrawableFunds();
-    escrowAgentContext?.getAgents();
-    escrowAgentContext?.getAgentsWaitlist();
-    escrowAgentContext?.setEventHandlers();
-  }, []);
-
   return escrowAgentContext ? (
     <div>
       <FunctionButtons />

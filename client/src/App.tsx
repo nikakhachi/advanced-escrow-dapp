@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { EscrowAgentContext } from "./contexts/EscrowAgentContext";
 import { Role } from "./types/enums";
 import { shortenAddress } from "./utils";
@@ -10,6 +10,15 @@ import { NoMetamaskView } from "./views/NoMetamaskView";
 
 function App() {
   const escrowAgentContext = useContext(EscrowAgentContext);
+
+  useEffect(() => {
+    escrowAgentContext?.getEscrows();
+    escrowAgentContext?.getAgentFeePercentage();
+    escrowAgentContext?.getWithdrawableFunds();
+    escrowAgentContext?.getAgents();
+    escrowAgentContext?.getAgentsWaitlist();
+    escrowAgentContext?.setEventHandlers();
+  }, []);
 
   return (
     <div className="bg-black  text-white">

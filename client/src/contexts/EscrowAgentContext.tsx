@@ -43,6 +43,8 @@ if (typeof window !== "undefined") {
   metamaskWallet = window.ethereum;
 }
 
+const publicJsonRpcProvider = new ethers.providers.JsonRpcProvider("URL");
+
 export const EscrowAgentContext = createContext<EscrowAgentContextType | null>(null);
 
 export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) => {
@@ -158,8 +160,8 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
 
   const getContract = (signer?: ethers.Signer | ethers.providers.Provider): ethers.Contract => {
     if (contract) return contract;
-    const fetchedContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_JSON.abi, signer);
-    setContract(fetchedContract);
+    const fetchedContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_JSON.abi, signer || publicJsonRpcProvider);
+    if (signer) setContract(fetchedContract);
     return fetchedContract;
   };
 
@@ -323,7 +325,7 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
   };
 
   const setEventHandlers = () => {
-    const contract = getContract(getSigner());
+    const contract = getContract();
     contract.provider.once("block", () => {
       contract.on("EscrowInitiated", (escrow: EscrowType) => {
         setEscrows((prevState) =>
