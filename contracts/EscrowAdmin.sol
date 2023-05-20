@@ -20,9 +20,9 @@ contract EscrowAdmin is EscrowBase {
             _amount <= withdrawableFunds,
             "Not enough ETH in withdrawable funds"
         );
-        payable(owner()).transfer(withdrawableFunds);
+        payable(owner()).transfer(_amount);
         emit FundsWithdrawn(withdrawableFunds);
-        withdrawableFunds = 0;
+        withdrawableFunds -= _amount;
     }
 
     function addAgent(address _agent) external onlyOwner {

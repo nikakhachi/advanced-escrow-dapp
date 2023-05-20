@@ -86,6 +86,8 @@ contract EscrowAgent is EscrowBase, EscrowAdmin {
         );
         escrow.status = EscrowStatus.CANCELED;
         escrow.updatedAt = block.timestamp;
+        uint agentFee = (escrow.amount * escrow.agentFeePercentage) / 100;
+        withdrawableFunds += agentFee;
         payable(escrow.buyer).transfer(escrow.amount);
         emit EscrowCanceled(_escrowId, block.timestamp);
     }
