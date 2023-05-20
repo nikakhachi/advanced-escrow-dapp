@@ -74,6 +74,10 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
         checkIfNetworkIsGoerli();
         setMetamaskAccount(account);
         setIsLoading(false);
+      } else {
+        setMetamaskAccount(undefined);
+        setIsNetworkGoerli(undefined);
+        setIsLoading(false);
       }
       (metamaskWallet as any).on("accountsChanged", (accounts: any[]) => {
         if (!accounts.length) {
