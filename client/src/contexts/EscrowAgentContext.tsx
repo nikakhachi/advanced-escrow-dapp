@@ -213,6 +213,7 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
       const txn = await contract.initiateEscrow(seller, buyer, ethers.utils.parseEther(String(depositAmountInETH)));
       await txn.wait();
     } catch (error) {
+      console.error(error);
       snackbarContext?.open("Error", "error");
     }
   };
@@ -223,6 +224,7 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
       const txn = await contract.archiveEscrow(escrowId);
       await txn.wait();
     } catch (error) {
+      console.error(error);
       snackbarContext?.open("Error", "error");
     }
   };
@@ -233,6 +235,7 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
       const txn = await contract.cancelEscrow(escrowId);
       await txn.wait();
     } catch (error) {
+      console.error(error);
       snackbarContext?.open("Error", "error");
     }
   };
