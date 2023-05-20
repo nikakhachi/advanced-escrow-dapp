@@ -243,7 +243,7 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
     try {
       if (seller.toUpperCase() === buyer.toUpperCase()) return snackbarContext?.open("Buyer and Seller must be different", "error");
       const contract = getContract(getSigner());
-      const txn = await contract.initiateEscrow(seller, buyer, ethers.utils.parseEther(String(depositAmountInETH)));
+      const txn = await contract.initiateEscrow(buyer, seller, ethers.utils.parseEther(String(depositAmountInETH)));
       await txn.wait();
     } catch (error) {
       console.error(error);
