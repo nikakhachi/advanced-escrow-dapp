@@ -169,7 +169,9 @@ describe("Escrow", function () {
 
       const buyerBalanceAfterDepositing = Number(ethers.utils.formatEther(await acc1.getBalance()));
 
+      expect(Number(ethers.utils.formatEther(await ethers.provider.getBalance(acc1.address)))).to.lessThan(9997.25);
       await contract.cancelEscrow(0);
+      expect(Number(ethers.utils.formatEther(await ethers.provider.getBalance(acc1.address)))).to.greaterThan(9999.7);
       expect((await contract.getEscrowById(0)).status).to.eq(3);
 
       const buyerBalanceAfterCanciling = Number(ethers.utils.formatEther(await acc1.getBalance()));
@@ -181,7 +183,9 @@ describe("Escrow", function () {
 
       await contract.connect(acc4).initiateEscrow(acc2.address, acc3.address, ethers.utils.parseEther("2.5"));
       await contract.connect(acc2).depositEscrow(2, { value: ethers.utils.parseEther("2.75") });
+      expect(Number(ethers.utils.formatEther(await ethers.provider.getBalance(acc3.address)))).to.eq(10000);
       await contract.connect(acc4).ApproveEscrow(2);
+      expect(Number(ethers.utils.formatEther(await ethers.provider.getBalance(acc3.address)))).to.eq(10002.5);
       expect((await contract.getEscrowById(2)).status).to.eq(2);
     });
   });
