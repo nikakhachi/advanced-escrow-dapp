@@ -364,7 +364,7 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
             {
               seller: escrow.seller,
               buyer: escrow.buyer,
-              id: escrow.id,
+              id: Number(escrow.id),
               amount: Number(ethers.utils.formatEther(escrow.amount)),
               status: escrow.status,
               agentFeePercentage: escrow.agentFeePercentage,
