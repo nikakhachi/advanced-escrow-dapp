@@ -44,7 +44,7 @@ if (typeof window !== "undefined") {
   metamaskWallet = window.ethereum;
 }
 
-const publicJsonRpcProvider = new ethers.providers.JsonRpcProvider("URL");
+const publicProvider = new ethers.providers.WebSocketProvider(import.meta.env.VITE_ALCHEMY_ENDPOINT);
 
 export const EscrowAgentContext = createContext<EscrowAgentContextType | null>(null);
 
@@ -104,7 +104,6 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
   useEffect(() => {
     (async () => {
       if (metamaskAccount) {
-        console.log("FETCH EVERYTHING BUT ESCROWS");
         fetchEverythingButEscrows();
       }
     })();
@@ -173,7 +172,7 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
 
   const getContract = (signer?: ethers.Signer | ethers.providers.Provider): ethers.Contract => {
     if (contract) return contract;
-    const fetchedContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_JSON.abi, signer || publicJsonRpcProvider);
+    const fetchedContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_JSON.abi, signer || publicProvider);
     if (signer) setContract(fetchedContract);
     return fetchedContract;
   };
