@@ -3,7 +3,7 @@ pragma solidity ^0.8.9;
 
 import "./EscrowBase.sol";
 
-contract EscrowAdmin is EscrowBase, ReentrancyGuard {
+contract EscrowAdmin is EscrowBase {
     function changeAgentFeePercentage(
         uint8 _newFeePercentage
     ) external onlyOwner {
