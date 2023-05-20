@@ -45,20 +45,25 @@ describe("Escrow", function () {
     it("Should set agent fee percentage correctly", async function () {
       const { contract } = await loadFixture(deployEscrowFixture);
       const UPDATE_AGENT_FEE_PERCENTAGE = 25;
-      await contract.changeAgentFeePercentage(UPDATE_AGENT_FEE_PERCENTAGE);
+      const tx = await contract.changeAgentFeePercentage(UPDATE_AGENT_FEE_PERCENTAGE);
+      await expect(tx).to.emit(contract, "AgentFeePercentageUpdated").withArgs(25);
       expect(await contract.agentFeePercentage()).to.equal(UPDATE_AGENT_FEE_PERCENTAGE);
     });
     it("Should withdraw funds correctly", async function () {
       const { contract, owner, acc2, acc5 } = await loadFixture(deployEscrowFixture);
-      await contract.initiateEscrow(acc2.address, acc5.address, ethers.utils.parseEther("2.5"));
-      await contract.connect(acc2).depositEscrow(0, { value: ethers.utils.parseEther("2.75") });
+      const tx1 = await contract.initiateEscrow(acc2.address, acc5.address, ethers.utils.parseEther("2.5"));
+      await expect(tx1).to.emit(contract, "EscrowInitiated");
+      const tx2 = await contract.connect(acc2).depositEscrow(0, { value: ethers.utils.parseEther("2.75") });
+      await expect(tx2).to.emit(contract, "EscrowPaid");
       expect(Number(ethers.utils.formatUnits(await contract.withdrawableFunds()))).to.eq(0);
-      await contract.cancelEscrow(0);
+      const tx3 = await contract.cancelEscrow(0);
+      await expect(tx3).to.emit(contract, "EscrowCanceled");
       const preContractBalance = Number(ethers.utils.formatUnits(await ethers.provider.getBalance(contract.address)));
       const preWithdrawableFunds = Number(ethers.utils.formatUnits(await contract.withdrawableFunds()));
       expect(preContractBalance).to.eq(0.25);
       expect(preWithdrawableFunds).to.eq(0.25);
-      await contract.withdrawFunds(ethers.utils.parseEther("0.2"));
+      const tx4 = await contract.withdrawFunds(ethers.utils.parseEther("0.2"));
+      await expect(tx4).to.emit(contract, "FundsWithdrawn");
       const postContractBalance = Number(ethers.utils.formatUnits(await ethers.provider.getBalance(contract.address)));
       const postWithdrawableFunds = Number(ethers.utils.formatUnits(await contract.withdrawableFunds()));
       expect(postContractBalance).to.eq(0.05);
@@ -73,9 +78,11 @@ describe("Escrow", function () {
     it("Should revoke an agent", async function () {
       const { contract, acc3 } = await loadFixture(deployEscrowFixture);
       expect(await contract.hasRole(ethers.utils.id("AGENT_ROLE"), acc3.address)).to.be.false;
-      await contract.addAgent(acc3.address);
+      const tx1 = await contract.addAgent(acc3.address);
+      await expect(tx1).to.emit(contract, "AgentAdded").withArgs(acc3.address);
       expect(await contract.hasRole(ethers.utils.id("AGENT_ROLE"), acc3.address)).to.be.true;
-      await contract.revokeAgent(acc3.address);
+      const tx2 = await contract.revokeAgent(acc3.address);
+      await expect(tx2).to.emit(contract, "AgentRevoked").withArgs(acc3.address);
       expect(await contract.hasRole(ethers.utils.id("AGENT_ROLE"), acc3.address)).to.be.false;
     });
     it("Should not allow non-owner to set agent fee percentage", async function () {
@@ -178,13 +185,15 @@ describe("Escrow", function () {
       expect(buyerBalanceAfterCanciling - buyerBalanceAfterDepositing).to.eq(2.5);
 
       await contract.connect(acc4).initiateEscrow(acc2.address, acc3.address, ethers.utils.parseEther("2.5"));
-      await contract.connect(acc4).archiveEscrow(1);
+      const tx1 = await contract.connect(acc4).archiveEscrow(1);
+      await expect(tx1).to.emit(contract, "EscrowArchived");
       expect((await contract.getEscrowById(1)).status).to.eq(4);
 
       await contract.connect(acc4).initiateEscrow(acc2.address, acc3.address, ethers.utils.parseEther("2.5"));
       await contract.connect(acc2).depositEscrow(2, { value: ethers.utils.parseEther("2.75") });
       expect(Number(ethers.utils.formatEther(await ethers.provider.getBalance(acc3.address)))).to.eq(10000);
-      await contract.connect(acc4).ApproveEscrow(2);
+      const tx2 = await contract.connect(acc4).ApproveEscrow(2);
+      await expect(tx2).to.emit(contract, "EscrowApproved");
       expect(Number(ethers.utils.formatEther(await ethers.provider.getBalance(acc3.address)))).to.eq(10002.5);
       expect((await contract.getEscrowById(2)).status).to.eq(2);
     });
