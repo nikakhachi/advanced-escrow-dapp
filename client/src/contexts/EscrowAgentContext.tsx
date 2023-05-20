@@ -156,7 +156,7 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
   //
   //
 
-  const getContract = (signer: ethers.Signer | ethers.providers.Provider | undefined): ethers.Contract => {
+  const getContract = (signer?: ethers.Signer | ethers.providers.Provider): ethers.Contract => {
     if (contract) return contract;
     const fetchedContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_JSON.abi, signer);
     setContract(fetchedContract);
@@ -164,7 +164,7 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
   };
 
   const getEscrows = async () => {
-    const contract = getContract(getSigner());
+    const contract = getContract();
     const escrowsRaw = await contract.getAllEscrows();
     const escrows: EscrowType[] = escrowsRaw
       .map((item: any) => ({
@@ -183,25 +183,25 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
   };
 
   const getAgentFeePercentage = async () => {
-    const contract = getContract(getSigner());
+    const contract = getContract();
     const agentFeePercentageRaw = await contract.agentFeePercentage();
     setAgentFeePercentage(agentFeePercentageRaw);
   };
 
   const getWithdrawableFunds = async () => {
-    const contract = getContract(getSigner());
+    const contract = getContract();
     const withdrawableFundsRaw = await contract.withdrawableFunds();
     setWithdrawableFunds(Number(ethers.utils.formatEther(withdrawableFundsRaw)));
   };
 
   const getAgents = async () => {
-    const contract = getContract(getSigner());
+    const contract = getContract();
     const agentsRaw = await contract.getAgents();
     setAgents(agentsRaw);
   };
 
   const getAgentsWaitlist = async () => {
-    const contract = getContract(getSigner());
+    const contract = getContract();
     const agentsWaitlistRaw = await contract.getAgentsWaitlist();
     setAgentsWaitlist(agentsWaitlistRaw);
   };
