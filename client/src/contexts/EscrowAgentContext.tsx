@@ -381,7 +381,7 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
         setEscrows((prevState) =>
           prevState
             .map((escrow) => {
-              if (escrow.id === id.toNumber()) {
+              if (escrow.id === Number(ethers.utils.formatUnits(id))) {
                 return { ...escrow, status, updatedAt: new Date(timestamp.toNumber() * 1000) };
               }
               return escrow;
