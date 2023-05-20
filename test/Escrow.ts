@@ -49,8 +49,20 @@ describe("Escrow", function () {
       expect(await contract.agentFeePercentage()).to.equal(UPDATE_AGENT_FEE_PERCENTAGE);
     });
     it("Should withdraw funds correctly", async function () {
-      const { contract, owner } = await loadFixture(deployEscrowFixture);
-      expect(await contract.owner()).to.equal(owner.address);
+      const { contract, owner, acc2, acc5 } = await loadFixture(deployEscrowFixture);
+      await contract.initiateEscrow(acc2.address, acc5.address, ethers.utils.parseEther("2.5"));
+      await contract.connect(acc2).depositEscrow(0, { value: ethers.utils.parseEther("2.75") });
+      expect(Number(ethers.utils.formatUnits(await contract.withdrawableFunds()))).to.eq(0);
+      await contract.cancelEscrow(0);
+      const preContractBalance = Number(ethers.utils.formatUnits(await ethers.provider.getBalance(contract.address)));
+      const preWithdrawableFunds = Number(ethers.utils.formatUnits(await contract.withdrawableFunds()));
+      expect(preContractBalance).to.eq(0.25);
+      expect(preWithdrawableFunds).to.eq(0.25);
+      await contract.withdrawFunds(ethers.utils.parseEther("0.2"));
+      const postContractBalance = Number(ethers.utils.formatUnits(await ethers.provider.getBalance(contract.address)));
+      const postWithdrawableFunds = Number(ethers.utils.formatUnits(await contract.withdrawableFunds()));
+      expect(postContractBalance).to.eq(0.05);
+      expect(postWithdrawableFunds).to.eq(0.05);
     });
     it("Should add an agent", async function () {
       const { contract, acc2 } = await loadFixture(deployEscrowFixture);
