@@ -388,7 +388,7 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
             })
             .sort((a: EscrowType, b: EscrowType) => b.updatedAt.valueOf() - a.updatedAt.valueOf())
         );
-        if (status === EscrowStatus.APPROVED) {
+        if (status === EscrowStatus.APPROVED || status === EscrowStatus.CANCELED) {
           const withdrawableFundsRes = await contract.withdrawableFunds();
           setWithdrawableFunds(Number(ethers.utils.formatEther(withdrawableFundsRes)));
         }
@@ -410,7 +410,7 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
         snackbarContext?.open("Escrow Achived", "info");
       });
       contract.on("FundsWithdrawn", (amount: BigNumber) => {
-        setWithdrawableFunds((s) => s - amount.toNumber());
+        setWithdrawableFunds((s) => s - Number(ethers.utils.formatEther(amount)));
         snackbarContext?.open("Funds withdraw", "info");
       });
       contract.on("AgentFeePercentageUpdated", (newAgentFeePercentage: number) => {
