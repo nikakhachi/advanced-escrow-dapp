@@ -72,7 +72,10 @@ contract EscrowAgent is EscrowBase, EscrowAdmin {
         escrow.status = EscrowStatus.APPROVED;
         escrow.updatedAt = block.timestamp;
         withdrawableFunds += agentFee;
-        payable(escrow.seller).transfer(escrow.amount);
+        (bool success, ) = payable(escrow.seller).call{value: escrow.amount}(
+            ""
+        );
+        require(success, "Failed to send funds to seller");
         emit EscrowApproved(escrow.id, block.timestamp);
     }
 
@@ -88,7 +91,8 @@ contract EscrowAgent is EscrowBase, EscrowAdmin {
         escrow.updatedAt = block.timestamp;
         uint agentFee = (escrow.amount * escrow.agentFeePercentage) / 100;
         withdrawableFunds += agentFee;
-        payable(escrow.buyer).transfer(escrow.amount);
+        (bool success, ) = payable(escrow.buyer).call{value: escrow.amount}("");
+        require(success, "Failed to send funds to buyer");
         emit EscrowCanceled(_escrowId, block.timestamp);
     }
 

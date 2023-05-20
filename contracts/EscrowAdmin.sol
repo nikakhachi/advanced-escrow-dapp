@@ -3,7 +3,7 @@ pragma solidity ^0.8.9;
 
 import "./EscrowBase.sol";
 
-contract EscrowAdmin is EscrowBase {
+contract EscrowAdmin is EscrowBase, ReentrancyGuard {
     function changeAgentFeePercentage(
         uint8 _newFeePercentage
     ) external onlyOwner {
@@ -11,7 +11,7 @@ contract EscrowAdmin is EscrowBase {
         emit AgentFeePercentageUpdated(_newFeePercentage);
     }
 
-    function withdrawFunds(uint _amount) external onlyOwner {
+    function withdrawFunds(uint _amount) external onlyOwner nonReentrant {
         require(
             _amount <= address(this).balance,
             "Not enough ETH to withdraw on contract"
@@ -20,7 +20,8 @@ contract EscrowAdmin is EscrowBase {
             _amount <= withdrawableFunds,
             "Not enough ETH in withdrawable funds"
         );
-        payable(owner()).transfer(_amount);
+        (bool success, ) = payable(owner()).call{value: _amount}("");
+        require(success, "Failed to withdraw funds");
         emit FundsWithdrawn(withdrawableFunds);
         withdrawableFunds -= _amount;
     }
