@@ -381,19 +381,25 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
         setEscrows((prevState) =>
           prevState
             .map((escrow) => {
-              if (escrow.id === Number(ethers.utils.formatUnits(id))) {
+              console.log("------");
+              console.log(escrow.id === Number(id), escrow.id, Number(id));
+              console.log("------");
+              if (escrow.id === Number(id)) {
+                console.log("ESAA, GLIJE");
                 return { ...escrow, status, updatedAt: new Date(timestamp.toNumber() * 1000) };
               }
               return escrow;
             })
             .sort((a: EscrowType, b: EscrowType) => b.updatedAt.valueOf() - a.updatedAt.valueOf())
         );
+        console.log("SHECVALA ESKROUEBII");
         if (status === EscrowStatus.APPROVED || status === EscrowStatus.CANCELED) {
           const withdrawableFundsRes = await contract.withdrawableFunds();
           setWithdrawableFunds(Number(ethers.utils.formatEther(withdrawableFundsRes)));
         }
       };
       contract.on("EscrowPaid", (id: BigNumber, timestamp: BigNumber) => {
+        console.log("ESCROW PAID EVENT CAUGHT");
         escrowStatusChangeHandler(id, timestamp, EscrowStatus.PENDING_APPROVAL);
         snackbarContext?.open("Escrow Deposited", "info");
       });
