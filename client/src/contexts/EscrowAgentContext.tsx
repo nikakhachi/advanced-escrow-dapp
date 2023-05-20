@@ -9,7 +9,7 @@ import { Role } from "../types/enums";
 type EscrowAgentContextType = {
   metamaskWallet: any;
   metamaskAccount: any;
-  connectToWallet: () => void;
+  connectToWallet: () => Promise<void>;
   isLoading: boolean;
   getSigner: () => ethers.providers.JsonRpcSigner;
   isNetworkGoerli: boolean | undefined;
@@ -32,9 +32,10 @@ type EscrowAgentContextType = {
   applyAsAnAgent: () => Promise<void>;
   addAgent: (address: string) => Promise<void>;
   revokeAgent: (address: string) => Promise<void>;
-  role: Role;
+  role: Role | null;
   setEventHandlers: () => void;
   updateAgentFeePercentage: (amount: number) => Promise<void>;
+  areEscrowsLoading: boolean;
 };
 
 let metamaskWallet: ethers.providers.ExternalProvider | undefined;
@@ -57,12 +58,14 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
   const [isNetworkGoerli, setIsNetworkGoerli] = useState<boolean>();
 
   const [escrows, setEscrows] = useState<EscrowType[]>([]);
+  const [areEscrowsLoading, setAreEscrowsLoading] = useState(true);
+
   const [agentFeePercentage, setAgentFeePercentage] = useState(0);
   const [withdrawableFunds, setWithdrawableFunds] = useState(0);
   const [agents, setAgents] = useState<string[]>([]);
   const [agentsWaitlist, setAgentsWaitlist] = useState<string[]>([]);
 
-  const [role, setRole] = useState<Role>(Role.VISITOR);
+  const [role, setRole] = useState<Role | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -76,6 +79,7 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
         if (!accounts.length) {
           setMetamaskAccount(undefined);
           setIsNetworkGoerli(undefined);
+          setRole(null);
         } else {
           setMetamaskAccount(accounts[0]);
         }
@@ -96,6 +100,15 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [metamaskAccount, escrows.length]);
+
+  useEffect(() => {
+    (async () => {
+      if (metamaskAccount) {
+        console.log("FETCH EVERYTHING BUT ESCROWS");
+        fetchEverythingButEscrows();
+      }
+    })();
+  }, [metamaskAccount]);
 
   const findMetaMaskAccount = async () => {
     try {
@@ -166,46 +179,61 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
   };
 
   const getEscrows = async () => {
-    const contract = getContract();
-    const escrowsRaw = await contract.getAllEscrows();
-    const escrows: EscrowType[] = escrowsRaw
-      .map((item: any) => ({
-        seller: item.seller,
-        buyer: item.buyer,
-        id: item.id.toNumber(),
-        amount: Number(ethers.utils.formatEther(item.amount)),
-        status: item.status,
-        agentFeePercentage: item.agentFeePercentage,
-        description: item.description,
-        createdAt: new Date(item.createdAt.toNumber() * 1000),
-        updatedAt: new Date(item.updatedAt.toNumber() * 1000),
-      }))
-      .sort((a: EscrowType, b: EscrowType) => b.updatedAt.valueOf() - a.updatedAt.valueOf());
-    setEscrows(escrows);
+    try {
+      setAreEscrowsLoading(true);
+      const contract = getContract();
+      const escrowsRaw = await contract.getAllEscrows();
+      const escrows: EscrowType[] = escrowsRaw
+        .map((item: any) => ({
+          seller: item.seller,
+          buyer: item.buyer,
+          id: item.id.toNumber(),
+          amount: Number(ethers.utils.formatEther(item.amount)),
+          status: item.status,
+          agentFeePercentage: item.agentFeePercentage,
+          description: item.description,
+          createdAt: new Date(item.createdAt.toNumber() * 1000),
+          updatedAt: new Date(item.updatedAt.toNumber() * 1000),
+        }))
+        .sort((a: EscrowType, b: EscrowType) => b.updatedAt.valueOf() - a.updatedAt.valueOf());
+      setEscrows(escrows);
+    } catch (error) {
+      console.error(error);
+      snackbarContext?.open("Error", "error");
+    } finally {
+      setAreEscrowsLoading(false);
+    }
   };
 
   const getAgentFeePercentage = async () => {
-    const contract = getContract();
+    const contract = getContract(getSigner());
     const agentFeePercentageRaw = await contract.agentFeePercentage();
     setAgentFeePercentage(agentFeePercentageRaw);
   };
 
   const getWithdrawableFunds = async () => {
-    const contract = getContract();
+    const contract = getContract(getSigner());
     const withdrawableFundsRaw = await contract.withdrawableFunds();
     setWithdrawableFunds(Number(ethers.utils.formatEther(withdrawableFundsRaw)));
   };
 
   const getAgents = async () => {
-    const contract = getContract();
+    const contract = getContract(getSigner());
     const agentsRaw = await contract.getAgents();
     setAgents(agentsRaw);
   };
 
   const getAgentsWaitlist = async () => {
-    const contract = getContract();
+    const contract = getContract(getSigner());
     const agentsWaitlistRaw = await contract.getAgentsWaitlist();
     setAgentsWaitlist(agentsWaitlistRaw);
+  };
+
+  const fetchEverythingButEscrows = async () => {
+    getAgentFeePercentage();
+    getWithdrawableFunds();
+    getAgents();
+    getAgentsWaitlist();
   };
 
   const initiateEscrow = async (seller: string, buyer: string, depositAmountInETH: number) => {
@@ -426,6 +454,7 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
     role,
     setEventHandlers,
     updateAgentFeePercentage,
+    areEscrowsLoading,
   };
 
   return <EscrowAgentContext.Provider value={value}>{children}</EscrowAgentContext.Provider>;

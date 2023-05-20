@@ -1,51 +1,29 @@
 import { useContext, useEffect } from "react";
 import { EscrowAgentContext } from "./contexts/EscrowAgentContext";
-import { Role } from "./types/enums";
-import { shortenAddress } from "./utils";
-import { ConnectMetamaskView } from "./views/ConnectMetamaskView";
-import { HomeView } from "./views/HomeView";
-import { InvalidNetworkView } from "./views/InvalidNetworkView";
-import { LoadingView } from "./views/LoadingView";
-import { NoMetamaskView } from "./views/NoMetamaskView";
+import { Header } from "./components/Header";
+import { FunctionButtons } from "./components/FunctionButtons";
+import { EscrowCard } from "./components/EscrowCard";
+import { CircularProgress } from "@mui/material";
 
 function App() {
   const escrowAgentContext = useContext(EscrowAgentContext);
 
   useEffect(() => {
     escrowAgentContext?.getEscrows();
-    escrowAgentContext?.getAgentFeePercentage();
-    escrowAgentContext?.getWithdrawableFunds();
-    escrowAgentContext?.getAgents();
-    escrowAgentContext?.getAgentsWaitlist();
     escrowAgentContext?.setEventHandlers();
   }, []);
 
   return (
     <div className="bg-black  text-white">
-      <div className="w-full justify-center flex flex-col items-center pt-12 pb-12">
-        <p className="text-4xl font-semibold text-white">
-          <span className="text-[#00d395]">Escrow</span> Application
-        </p>
-        {escrowAgentContext?.metamaskAccount && (
-          <p className="mt-2">
-            Logged in as <span className="font-bold	">{shortenAddress(escrowAgentContext.metamaskAccount)}</span> (
-            {Role[escrowAgentContext.role]})
-          </p>
+      <Header />
+      <FunctionButtons />
+      <div className="mt-12 flex flex-wrap gap-4">
+        {escrowAgentContext?.areEscrowsLoading ? (
+          <CircularProgress color="inherit" />
+        ) : (
+          escrowAgentContext?.escrows.map((escrow) => <EscrowCard escrow={escrow} key={escrow.id} />)
         )}
       </div>
-      {!escrowAgentContext?.metamaskWallet ? (
-        <NoMetamaskView />
-      ) : escrowAgentContext?.isLoading ? (
-        <LoadingView />
-      ) : !escrowAgentContext?.metamaskAccount ? (
-        <ConnectMetamaskView />
-      ) : escrowAgentContext.isNetworkGoerli === undefined ? (
-        <LoadingView />
-      ) : escrowAgentContext.isNetworkGoerli === false ? (
-        <InvalidNetworkView />
-      ) : (
-        <HomeView />
-      )}
     </div>
   );
 }

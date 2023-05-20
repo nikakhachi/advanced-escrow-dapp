@@ -7,7 +7,7 @@ export enum EscrowStatus {
 }
 
 export enum Role {
-  OWNER,
+  OWNER = 1,
   AGENT,
   VISITOR,
 }

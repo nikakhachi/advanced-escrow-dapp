@@ -34,81 +34,72 @@ export const FunctionButtons: FC<FunctionButtonsProps> = () => {
     setUpdateAgentFeeDialogOpen(false);
   };
 
-  return (
-    escrowAgentContext && (
-      <>
-        <div>
-          {escrowAgentContext.role === Role.VISITOR && (
-            <button
-              onClick={() => setApplyingAsAgentDialogOpen(true)}
-              className="text-lg border-2 border-[#00d395] px-8 py-2 rounded-2xl mr-2"
-            >
-              Apply as an Agent
-            </button>
-          )}
-          {escrowAgentContext.role === Role.OWNER && (
-            <>
-              <button onClick={() => setAddAgentDialogOpen(true)} className="text-lg border-2 border-[#00d395] px-8 py-2 rounded-2xl mr-2">
-                Add Agent
-              </button>
-              <button
-                onClick={() => setRevokeAgentDialogOpen(true)}
-                className="text-lg border-2 border-[#00d395] px-8 py-2 rounded-2xl mr-2"
-              >
-                Revoke Agent
-              </button>{" "}
-              <button
-                onClick={() => setWithdrawFundsDialogOpen(true)}
-                className="text-lg border-2 border-[#00d395] px-8 py-2 rounded-2xl mr-2"
-              >
-                Withdraw Funds
-              </button>
-              <button
-                onClick={() => setUpdateAgentFeeDialogOpen(true)}
-                className="text-lg border-2 border-[#00d395] px-8 py-2 rounded-2xl mr-2"
-              >
-                Update Agent Fee
-              </button>
-            </>
-          )}
-          {escrowAgentContext.role !== Role.VISITOR && (
-            <button onClick={() => setInitiateEscrowDialogOpen(true)} className="text-lg border-2 border-[#00d395] px-8 py-2 rounded-2xl">
-              Initiate an Escrow
-            </button>
-          )}
-          <br />
+  return escrowAgentContext?.role ? (
+    <>
+      <div>
+        {escrowAgentContext.role === Role.VISITOR && (
           <button
-            onClick={() => setAgentsListDialogOpen(true)}
-            className="text-lg border-2 border-[#00d395] px-8 py-2 rounded-2xl mr-2 mt-4"
-          >
-            Active Agents
-          </button>
-          <button
-            onClick={() => setAgentsWaitlistDialogOpen(true)}
+            onClick={() => setApplyingAsAgentDialogOpen(true)}
             className="text-lg border-2 border-[#00d395] px-8 py-2 rounded-2xl mr-2"
           >
-            Waitlist Agents
+            Apply as an Agent
           </button>
-        </div>
-        <InitiateEscrowDialog open={initiateEscrowDialogOpen} handleClose={handleClose} />
-        <WithdrawFundsDialog open={withdrawFundsDialogOpen} handleClose={handleClose} />
-        <ApplyingAsAgentDialog open={applyingAsAgentDialogOpen} handleClose={handleClose} />
-        <AgentsListDialog
-          open={agentsListDialogOpen}
-          handleClose={handleClose}
-          title="Active Agents List"
-          agentAddresses={escrowAgentContext.agents}
-        />
-        <AgentsListDialog
-          open={agentsWaitlistDialogOpen}
-          handleClose={handleClose}
-          title="Waitlist Agents List"
-          agentAddresses={escrowAgentContext.agentsWaitlist}
-        />
-        <AddAgentDialog open={addAgentDialogOpen} handleClose={handleClose} />
-        <RevokeAgentDialog open={revokeAgentDialogOpen} handleClose={handleClose} />
-        <UpdateAgentFeePercentage open={updateAgentFeeDialogOpen} handleClose={handleClose} />
-      </>
-    )
+        )}
+        {escrowAgentContext.role === Role.OWNER && (
+          <>
+            <button onClick={() => setAddAgentDialogOpen(true)} className="text-lg border-2 border-[#00d395] px-8 py-2 rounded-2xl mr-2">
+              Add Agent
+            </button>
+            <button onClick={() => setRevokeAgentDialogOpen(true)} className="text-lg border-2 border-[#00d395] px-8 py-2 rounded-2xl mr-2">
+              Revoke Agent
+            </button>{" "}
+            <button
+              onClick={() => setWithdrawFundsDialogOpen(true)}
+              className="text-lg border-2 border-[#00d395] px-8 py-2 rounded-2xl mr-2"
+            >
+              Withdraw Funds
+            </button>
+            <button
+              onClick={() => setUpdateAgentFeeDialogOpen(true)}
+              className="text-lg border-2 border-[#00d395] px-8 py-2 rounded-2xl mr-2"
+            >
+              Update Agent Fee
+            </button>
+          </>
+        )}
+        {escrowAgentContext.role !== Role.VISITOR && (
+          <button onClick={() => setInitiateEscrowDialogOpen(true)} className="text-lg border-2 border-[#00d395] px-8 py-2 rounded-2xl">
+            Initiate an Escrow
+          </button>
+        )}
+        <br />
+        <button onClick={() => setAgentsListDialogOpen(true)} className="text-lg border-2 border-[#00d395] px-8 py-2 rounded-2xl mr-2 mt-4">
+          Active Agents
+        </button>
+        <button onClick={() => setAgentsWaitlistDialogOpen(true)} className="text-lg border-2 border-[#00d395] px-8 py-2 rounded-2xl mr-2">
+          Waitlist Agents
+        </button>
+      </div>
+      <InitiateEscrowDialog open={initiateEscrowDialogOpen} handleClose={handleClose} />
+      <WithdrawFundsDialog open={withdrawFundsDialogOpen} handleClose={handleClose} />
+      <ApplyingAsAgentDialog open={applyingAsAgentDialogOpen} handleClose={handleClose} />
+      <AgentsListDialog
+        open={agentsListDialogOpen}
+        handleClose={handleClose}
+        title="Active Agents List"
+        agentAddresses={escrowAgentContext.agents}
+      />
+      <AgentsListDialog
+        open={agentsWaitlistDialogOpen}
+        handleClose={handleClose}
+        title="Waitlist Agents List"
+        agentAddresses={escrowAgentContext.agentsWaitlist}
+      />
+      <AddAgentDialog open={addAgentDialogOpen} handleClose={handleClose} />
+      <RevokeAgentDialog open={revokeAgentDialogOpen} handleClose={handleClose} />
+      <UpdateAgentFeePercentage open={updateAgentFeeDialogOpen} handleClose={handleClose} />
+    </>
+  ) : (
+    <></>
   );
 };

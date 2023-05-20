@@ -22,37 +22,39 @@ export const EscrowCard: FC<EscrowCardProps> = ({ escrow }) => {
         <p className="text-gray-600 text-base">Amount: {escrow.amount}</p>
         <p className="text-gray-600 text-base">Agent Fee: {escrow.agentFeePercentage}%</p>
       </div>
-      <div className="px-6 pt-4 pb-2">
-        {escrow.status === EscrowStatus.PENDNG_PAYMENT && (
-          <>
-            {escrowAgentContext?.role !== Role.VISITOR && (
-              <button className={actionButtonClassName} onClick={() => escrowAgentContext?.archiveEscrow(escrow.id)}>
-                Archive
+      {escrowAgentContext?.role && (
+        <div className="px-6 pt-4 pb-2">
+          {escrow.status === EscrowStatus.PENDNG_PAYMENT && (
+            <>
+              {escrowAgentContext?.role !== Role.VISITOR && (
+                <button className={actionButtonClassName} onClick={() => escrowAgentContext?.archiveEscrow(escrow.id)}>
+                  Archive
+                </button>
+              )}
+              {escrowAgentContext?.metamaskAccount.toUpperCase() === escrow.buyer.toUpperCase() && (
+                <button
+                  className={actionButtonClassName}
+                  onClick={() =>
+                    escrowAgentContext?.depositEscrow(escrow.id, escrow.amount + (escrow.amount * escrow.agentFeePercentage) / 100)
+                  }
+                >
+                  Deposit
+                </button>
+              )}
+            </>
+          )}
+          {escrow.status === EscrowStatus.PENDING_APPROVAL && escrowAgentContext?.role !== Role.VISITOR ? (
+            <>
+              <button className={actionButtonClassName} onClick={() => escrowAgentContext?.cancelEscrow(escrow.id)}>
+                Cancel
               </button>
-            )}
-            {escrowAgentContext?.metamaskAccount.toUpperCase() === escrow.buyer.toUpperCase() && (
-              <button
-                className={actionButtonClassName}
-                onClick={() =>
-                  escrowAgentContext?.depositEscrow(escrow.id, escrow.amount + (escrow.amount * escrow.agentFeePercentage) / 100)
-                }
-              >
-                Deposit
+              <button className={actionButtonClassName} onClick={() => escrowAgentContext?.approveEscrow(escrow.id)}>
+                Approve
               </button>
-            )}
-          </>
-        )}
-        {escrow.status === EscrowStatus.PENDING_APPROVAL && escrowAgentContext?.role !== Role.VISITOR ? (
-          <>
-            <button className={actionButtonClassName} onClick={() => escrowAgentContext?.cancelEscrow(escrow.id)}>
-              Cancel
-            </button>
-            <button className={actionButtonClassName} onClick={() => escrowAgentContext?.approveEscrow(escrow.id)}>
-              Approve
-            </button>
-          </>
-        ) : null}
-      </div>
+            </>
+          ) : null}
+        </div>
+      )}
     </div>
   );
 };
