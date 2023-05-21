@@ -22,7 +22,7 @@ contract EscrowAdmin is EscrowBase {
         );
         (bool success, ) = payable(owner()).call{value: _amount}("");
         require(success, "Failed to withdraw funds");
-        emit FundsWithdrawn(withdrawableFunds);
+        emit FundsWithdrawn(_amount);
         withdrawableFunds -= _amount;
     }
 
