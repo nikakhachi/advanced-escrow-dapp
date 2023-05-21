@@ -88,6 +88,12 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
           setMetamaskAccount(accounts[0]);
         }
       });
+      (metamaskWallet as any).on("networkChanged", (networkId: string) => {
+        // goerli network
+        if (networkId === "5") {
+          window.location.reload();
+        }
+      });
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
