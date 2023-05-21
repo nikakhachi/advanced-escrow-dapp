@@ -431,6 +431,10 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
         setAgents((arr) => arr.filter((item) => item.toUpperCase() !== address.toUpperCase()));
         snackbarContext?.open("Agent Revoked", "info");
       });
+      contract.on("AgentApplied", (address: string) => {
+        setAgentsWaitlist((arr) => [...arr, address]);
+        snackbarContext?.open("Agent Applied", "info");
+      });
     });
   };
 
