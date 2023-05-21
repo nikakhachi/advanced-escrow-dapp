@@ -23,6 +23,7 @@ contract EscrowBase is Ownable, AccessControl, ReentrancyGuard {
     event AgentRevoked(address newAgent);
     event AgentFeePercentageUpdated(uint8 newAgentFeePercentage);
     event FundsWithdrawn(uint amount);
+    event AgentApplied(address appliedAgent);
 
     enum EscrowStatus {
         PENDING_PAYMENT,
@@ -86,5 +87,6 @@ contract EscrowBase is Ownable, AccessControl, ReentrancyGuard {
             "Address is already an agent"
         );
         agentWaitlist.push(msg.sender);
+        emit AgentApplied(msg.sender);
     }
 }

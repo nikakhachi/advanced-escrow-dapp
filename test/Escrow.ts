@@ -80,7 +80,8 @@ describe("Escrow", function () {
     });
     it("Should add an agent from waitlist (applied user)", async function () {
       const { contract, acc3 } = await loadFixture(deployEscrowFixture);
-      await contract.connect(acc3).applyForAgent();
+      const tx = await contract.connect(acc3).applyForAgent();
+      expect(tx).to.emit(contract, "AgentApplied");
       expect((await contract.getAgents()).length).to.equal(0);
       expect((await contract.getAgentsWaitlist()).length).to.equal(1);
       expect((await contract.getAgentsWaitlist())[0]).to.equal(acc3.address);
