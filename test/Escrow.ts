@@ -62,8 +62,9 @@ describe("Escrow", function () {
       const preWithdrawableFunds = Number(ethers.utils.formatUnits(await contract.withdrawableFunds()));
       expect(preContractBalance).to.eq(0.25);
       expect(preWithdrawableFunds).to.eq(0.25);
-      const tx = await contract.withdrawFunds(ethers.utils.parseEther("0.2"));
-      await expect(tx).to.emit(contract, "FundsWithdrawn");
+      const fundsToWithdraw = ethers.utils.parseEther("0.2");
+      const tx = await contract.withdrawFunds(fundsToWithdraw);
+      await expect(tx).to.emit(contract, "FundsWithdrawn").withArgs(fundsToWithdraw);
       const postContractBalance = Number(ethers.utils.formatUnits(await ethers.provider.getBalance(contract.address)));
       const postWithdrawableFunds = Number(ethers.utils.formatUnits(await contract.withdrawableFunds()));
       expect(postContractBalance).to.eq(0.05);
@@ -73,7 +74,7 @@ describe("Escrow", function () {
       const { contract, acc2 } = await loadFixture(deployEscrowFixture);
       expect(await contract.hasRole(ethers.utils.id("AGENT_ROLE"), acc2.address)).to.be.false;
       const tx = await contract.addAgent(acc2.address);
-      expect(tx).to.emit(contract, "AgentAdded");
+      expect(tx).to.emit(contract, "AgentAdded").withArgs(acc2.address);
       expect(await contract.hasRole(ethers.utils.id("AGENT_ROLE"), acc2.address)).to.be.true;
       expect((await contract.getAgents()).length).to.equal(1);
       expect((await contract.getAgents())[0]).to.equal(acc2.address);
@@ -81,7 +82,7 @@ describe("Escrow", function () {
     it("Should add an agent from waitlist (applied user)", async function () {
       const { contract, acc3 } = await loadFixture(deployEscrowFixture);
       const tx = await contract.connect(acc3).applyForAgent();
-      expect(tx).to.emit(contract, "AgentApplied");
+      expect(tx).to.emit(contract, "AgentApplied").withArgs(acc3.address);
       expect((await contract.getAgents()).length).to.equal(0);
       expect((await contract.getAgentsWaitlist()).length).to.equal(1);
       expect((await contract.getAgentsWaitlist())[0]).to.equal(acc3.address);
@@ -96,7 +97,7 @@ describe("Escrow", function () {
       expect(await contract.hasRole(ethers.utils.id("AGENT_ROLE"), acc3.address)).to.be.false;
       await contract.addAgent(acc3.address);
       const tx = await contract.revokeAgent(acc3.address);
-      expect(tx).to.emit(contract, "AgentRevoked");
+      expect(tx).to.emit(contract, "AgentRevoked").withArgs(acc3.address);
       expect(await contract.hasRole(ethers.utils.id("AGENT_ROLE"), acc3.address)).to.be.false;
       expect((await contract.getAgents()).length).to.equal(0);
     });
