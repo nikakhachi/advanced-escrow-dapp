@@ -5,6 +5,7 @@ import { FunctionButtons } from "./components/FunctionButtons";
 import { EscrowCard } from "./components/EscrowCard";
 import { CircularProgress } from "@mui/material";
 import { EscrowStatus } from "./types";
+import React from "react";
 
 function App() {
   const escrowAgentContext = useContext(EscrowAgentContext);
@@ -23,18 +24,18 @@ function App() {
           <CircularProgress color="inherit" />
         ) : (
           <>
-            {Object.keys(EscrowStatus).map((item) =>
+            {Object.keys(EscrowStatus).map((item, index) =>
               Number.isNaN(Number(item)) ? (
-                <>
+                <React.Fragment key={item}>
                   <p className="w-full text-xl mt-4">Status: {item}</p>
                   {escrowAgentContext?.escrows
                     .filter((escrow) => EscrowStatus[escrow.status] === item)
                     .map((escrow) => (
                       <EscrowCard escrow={escrow} key={escrow.id} />
                     ))}
-                </>
+                </React.Fragment>
               ) : (
-                <></>
+                <React.Fragment key={index}></React.Fragment>
               )
             )}
           </>

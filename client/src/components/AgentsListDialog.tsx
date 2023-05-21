@@ -19,7 +19,7 @@ export const AgentsListDialog: FC<AgentsListDialogProps> = ({ handleClose, open,
           ) : (
             <ul className="list-disc">
               {agentAddresses.map((agentAddress) => (
-                <li>{agentAddress}</li>
+                <li key={agentAddress}>{agentAddress}</li>
               ))}
             </ul>
           )}
