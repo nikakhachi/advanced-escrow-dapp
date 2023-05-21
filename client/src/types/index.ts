@@ -1,5 +1,5 @@
 export enum EscrowStatus {
-  PENDNG_PAYMENT,
+  PENDING_PAYMENT,
   PENDING_APPROVAL,
   APPROVED,
   CANCELED,

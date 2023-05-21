@@ -24,7 +24,7 @@ export const EscrowCard: FC<EscrowCardProps> = ({ escrow }) => {
       </div>
       {escrowAgentContext?.role && (
         <div className="px-6 pt-4 pb-2">
-          {escrow.status === EscrowStatus.PENDNG_PAYMENT && (
+          {escrow.status === EscrowStatus.PENDING_PAYMENT && (
             <>
               {escrowAgentContext?.role !== Role.VISITOR && (
                 <button className={actionButtonClassName} onClick={() => escrowAgentContext?.archiveEscrow(escrow.id)}>

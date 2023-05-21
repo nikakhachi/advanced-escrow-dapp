@@ -31,7 +31,7 @@ contract EscrowAgent is EscrowBase, EscrowAdmin {
             _buyer,
             _seller,
             _amount,
-            EscrowStatus.PENDNG_PAYMENT,
+            EscrowStatus.PENDING_PAYMENT,
             agentFeePercentage,
             block.timestamp,
             block.timestamp
@@ -47,7 +47,7 @@ contract EscrowAgent is EscrowBase, EscrowAdmin {
             "Only buyer should deposit into an escrow"
         );
         require(
-            escrow.status == EscrowStatus.PENDNG_PAYMENT,
+            escrow.status == EscrowStatus.PENDING_PAYMENT,
             "Escrow is not accepting payments"
         );
         uint feeForAgent = (escrow.amount * escrow.agentFeePercentage) / 100;
@@ -101,7 +101,7 @@ contract EscrowAgent is EscrowBase, EscrowAdmin {
     ) external onlyRole(AGENT_ROLE) nonReentrant {
         EscrowDocument storage escrow = escrows[_escrowId];
         require(
-            escrow.status == EscrowStatus.PENDNG_PAYMENT,
+            escrow.status == EscrowStatus.PENDING_PAYMENT,
             "Can't archive active Escrow"
         );
         escrow.status = EscrowStatus.ARCHIVED;

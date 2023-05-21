@@ -25,7 +25,7 @@ contract EscrowBase is Ownable, AccessControl, ReentrancyGuard {
     event FundsWithdrawn(uint amount);
 
     enum EscrowStatus {
-        PENDNG_PAYMENT,
+        PENDING_PAYMENT,
         PENDING_APPROVAL,
         APPROVED,
         CANCELED,
