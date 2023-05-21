@@ -32,12 +32,7 @@ export const EscrowCard: FC<EscrowCardProps> = ({ escrow }) => {
                 </button>
               )}
               {escrowAgentContext?.metamaskAccount.toUpperCase() === escrow.buyer.toUpperCase() && (
-                <button
-                  className={actionButtonClassName}
-                  onClick={() =>
-                    escrowAgentContext?.depositEscrow(escrow.id, escrow.amount + (escrow.amount * escrow.agentFeePercentage) / 100)
-                  }
-                >
+                <button className={actionButtonClassName} onClick={() => escrowAgentContext?.depositEscrow(escrow)}>
                   Deposit
                 </button>
               )}

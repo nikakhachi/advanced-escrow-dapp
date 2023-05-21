@@ -27,7 +27,7 @@ type EscrowAgentContextType = {
   archiveEscrow: (escrowId: number) => Promise<void>;
   cancelEscrow: (escrowId: number) => Promise<void>;
   approveEscrow: (escrowId: number) => Promise<void>;
-  depositEscrow: (escrowId: number, depositAmountInETH: number) => Promise<void>;
+  depositEscrow: (escrow: EscrowType) => Promise<void>;
   withdrawFunds: (amount: number) => Promise<void>;
   applyAsAnAgent: () => Promise<void>;
   addAgent: (address: string) => Promise<void>;
@@ -290,15 +290,16 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
     }
   };
 
-  const depositEscrow = async (escrowId: number, depositAmountInETH: number) => {
+  const depositEscrow = async (escrow: EscrowType) => {
     try {
       const contract = getContract(getSigner());
-      const amount = String(depositAmountInETH).length > 18 ? depositAmountInETH.toFixed(18) : String(depositAmountInETH);
-      const txn = await contract.depositEscrow(escrowId, { value: ethers.utils.parseEther(amount) });
+      const txn = await contract.depositEscrow(escrow.id, {
+        value: ethers.utils.parseEther((escrow.amount * (1 + escrow.agentFeePercentage / 100)).toFixed(1)),
+      });
       await txn.wait();
     } catch (error: any) {
       console.error(error);
-      const escrowBuyerAddress = escrows.find((item) => item.id === escrowId)?.buyer;
+      const escrowBuyerAddress = escrows.find((item) => item.id === escrow.id)?.buyer;
       if (metamaskAccount?.toLowerCase() !== escrowBuyerAddress?.toLowerCase()) {
         return snackbarContext?.open("You should be the buyer to deposit to the escrow", "error");
       }
