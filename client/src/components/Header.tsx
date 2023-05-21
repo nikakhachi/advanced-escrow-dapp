@@ -14,6 +14,8 @@ export const Header: FC<HeaderProps> = () => {
       </p>
       {escrowAgentContext?.isLoading ? (
         <p>Loading</p>
+      ) : !escrowAgentContext?.isNetworkGoerli ? (
+        <p>Switch to Goerli network and refresh the page</p>
       ) : escrowAgentContext?.metamaskAccount ? (
         <p className="mt-2">
           Logged in as <span className="font-bold	">{shortenAddress(escrowAgentContext.metamaskAccount)}</span>
