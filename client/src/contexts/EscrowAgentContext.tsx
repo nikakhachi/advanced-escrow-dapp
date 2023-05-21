@@ -5,6 +5,7 @@ import CONTRACT_JSON from "../constants/EscrowAgentContract.json";
 import { EscrowStatus, EscrowType } from "../types";
 import { SnackbarContext } from "./SnackbarContext";
 import { Role } from "../types/enums";
+import Decimal from "decimal.js";
 
 type EscrowAgentContextType = {
   metamaskWallet: any;
@@ -293,8 +294,11 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
   const depositEscrow = async (escrow: EscrowType) => {
     try {
       const contract = getContract(getSigner());
+      const amount = new Decimal(escrow.amount);
+      const agentFeePercentage = new Decimal(1 + escrow.agentFeePercentage / 100);
+      const finalValue = amount.mul(agentFeePercentage);
       const txn = await contract.depositEscrow(escrow.id, {
-        value: ethers.utils.parseEther((escrow.amount * (1 + escrow.agentFeePercentage / 100)).toFixed(1)),
+        value: ethers.utils.parseEther(finalValue.toString()),
       });
       await txn.wait();
     } catch (error: any) {
