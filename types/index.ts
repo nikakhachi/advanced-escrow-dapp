@@ -1,0 +1,7 @@
+export enum EscrowStatus {
+  PENDING_PAYMENT,
+  PENDING_APPROVAL,
+  APPROVED,
+  CANCELED,
+  ARCHIVED,
+}
