@@ -60,7 +60,7 @@ contract EscrowAgent is EscrowBase, EscrowAdmin {
         emit EscrowPaid(escrow.id, block.timestamp);
     }
 
-    function ApproveEscrow(
+    function approveEscrow(
         uint _escrowId
     ) external onlyRole(AGENT_ROLE) nonReentrant {
         EscrowDocument storage escrow = escrows[_escrowId];
@@ -85,7 +85,7 @@ contract EscrowAgent is EscrowBase, EscrowAdmin {
         EscrowDocument storage escrow = escrows[_escrowId];
         require(
             escrow.status == EscrowStatus.PENDING_APPROVAL,
-            "You can only reject deposited Escrow"
+            "You can only cancel deposited Escrow"
         );
         escrow.status = EscrowStatus.CANCELED;
         escrow.updatedAt = block.timestamp;

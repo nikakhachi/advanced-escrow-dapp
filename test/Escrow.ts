@@ -62,7 +62,8 @@ describe("Escrow", function () {
       const preWithdrawableFunds = Number(ethers.utils.formatUnits(await contract.withdrawableFunds()));
       expect(preContractBalance).to.eq(0.25);
       expect(preWithdrawableFunds).to.eq(0.25);
-      await contract.withdrawFunds(ethers.utils.parseEther("0.2"));
+      const tx = await contract.withdrawFunds(ethers.utils.parseEther("0.2"));
+      await expect(tx).to.emit(contract, "FundsWithdrawn");
       const postContractBalance = Number(ethers.utils.formatUnits(await ethers.provider.getBalance(contract.address)));
       const postWithdrawableFunds = Number(ethers.utils.formatUnits(await contract.withdrawableFunds()));
       expect(postContractBalance).to.eq(0.05);
@@ -71,7 +72,8 @@ describe("Escrow", function () {
     it("Should add an agent", async function () {
       const { contract, acc2 } = await loadFixture(deployEscrowFixture);
       expect(await contract.hasRole(ethers.utils.id("AGENT_ROLE"), acc2.address)).to.be.false;
-      await contract.addAgent(acc2.address);
+      const tx = await contract.addAgent(acc2.address);
+      expect(tx).to.emit(contract, "AgentAdded");
       expect(await contract.hasRole(ethers.utils.id("AGENT_ROLE"), acc2.address)).to.be.true;
       expect((await contract.getAgents()).length).to.equal(1);
       expect((await contract.getAgents())[0]).to.equal(acc2.address);
@@ -92,7 +94,8 @@ describe("Escrow", function () {
       const { contract, acc3 } = await loadFixture(deployEscrowFixture);
       expect(await contract.hasRole(ethers.utils.id("AGENT_ROLE"), acc3.address)).to.be.false;
       await contract.addAgent(acc3.address);
-      await contract.revokeAgent(acc3.address);
+      const tx = await contract.revokeAgent(acc3.address);
+      expect(tx).to.emit(contract, "AgentRevoked");
       expect(await contract.hasRole(ethers.utils.id("AGENT_ROLE"), acc3.address)).to.be.false;
       expect((await contract.getAgents()).length).to.equal(0);
     });
@@ -197,7 +200,8 @@ describe("Escrow", function () {
       const buyer = acc2.address;
       const seller = acc3.address;
       const ethAmount = 10;
-      await contract.initiateEscrow(buyer, seller, ethers.utils.parseEther(String(ethAmount)));
+      const tx = await contract.initiateEscrow(buyer, seller, ethers.utils.parseEther(String(ethAmount)));
+      expect(tx).to.emit(contract, "EscrowInitiated");
       expect((await contract.getAllEscrows()).length).to.equal(STARTER_ESCROW_COUNT + 1);
       const initiatedEscrow = await contract.getEscrowById(STARTER_ESCROW_COUNT);
       expect(initiatedEscrow.status).to.eq(EscrowStatus.PENDING_PAYMENT);
@@ -225,9 +229,10 @@ describe("Escrow", function () {
       );
     });
     it("Should deposit an Escrow", async function () {
-      await contract.connect(FIRST_ESCROW_BUYER).depositEscrow(FIRST_ESCROW_ID, {
+      const tx = await contract.connect(FIRST_ESCROW_BUYER).depositEscrow(FIRST_ESCROW_ID, {
         value: ethers.utils.parseEther(String(FIRST_ESCROW_ETH_AMOUNT * (1 + INITIAL_AGENT_FEE_PERCENTAGE / 100))),
       });
+      expect(tx).to.emit(contract, "EscrowPaid");
       const depositedEscrow = await contract.getEscrowById(FIRST_ESCROW_ID);
       expect(depositedEscrow.status).to.eq(EscrowStatus.PENDING_APPROVAL);
     });
@@ -249,7 +254,8 @@ describe("Escrow", function () {
       ).to.be.revertedWith("Deposit must be equal to amount including the agent fee");
     });
     it("Should archive an Escrow", async function () {
-      await contract.archiveEscrow(FIRST_ESCROW_ID);
+      const tx = await contract.archiveEscrow(FIRST_ESCROW_ID);
+      expect(tx).to.emit(contract, "EscrowArchived");
       const archivedEscrow = await contract.getEscrowById(FIRST_ESCROW_ID);
       expect(archivedEscrow.status).to.eq(EscrowStatus.ARCHIVED);
     });
@@ -257,15 +263,17 @@ describe("Escrow", function () {
       await expect(contract.archiveEscrow(SECOND_ESCROW_ID)).to.be.revertedWith("Can't archive active Escrow");
     });
     it("Should cancel an Escrow", async function () {
-      await contract.cancelEscrow(SECOND_ESCROW_ID);
+      const tx = await contract.cancelEscrow(SECOND_ESCROW_ID);
+      expect(tx).to.emit(contract, "EscrowCanceled");
       const canceledEscrow = await contract.getEscrowById(SECOND_ESCROW_ID);
       expect(canceledEscrow.status).to.eq(EscrowStatus.CANCELED);
     });
     it("Should NOT cancel an Escrow", async function () {
-      await expect(contract.cancelEscrow(FIRST_ESCROW_ID)).to.be.revertedWith("You can only reject deposited Escrow");
+      await expect(contract.cancelEscrow(FIRST_ESCROW_ID)).to.be.revertedWith("You can only cancel deposited Escrow");
     });
     it("Should approve an Escrow", async function () {
-      await contract.approveEscrow(SECOND_ESCROW_ID);
+      const tx = await contract.approveEscrow(SECOND_ESCROW_ID);
+      expect(tx).to.emit(contract, "EscrowApproved");
       const approvedEscrow = await contract.getEscrowById(SECOND_ESCROW_ID);
       expect(approvedEscrow.status).to.eq(EscrowStatus.APPROVED);
     });
