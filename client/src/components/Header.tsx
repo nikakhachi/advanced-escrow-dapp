@@ -12,21 +12,26 @@ export const Header: FC<HeaderProps> = () => {
       <p className="text-4xl font-semibold text-white">
         <span className="text-[#00d395]">Escrow</span> Application
       </p>
-      {escrowAgentContext?.isLoading ? (
+      {!escrowAgentContext?.metamaskWallet ? (
+        <p>Metamask Wallet Missing</p>
+      ) : escrowAgentContext?.isLoading ? (
         <p>Loading</p>
-      ) : !escrowAgentContext?.isNetworkGoerli ? (
-        <p>Switch to Goerli network</p>
-      ) : escrowAgentContext?.metamaskAccount ? (
+      ) : !escrowAgentContext?.metamaskAccount ? (
+        <button onClick={escrowAgentContext?.connectToWallet} className="border-2 border-[#00d395] px-4 py-1 rounded-2xl mt-4">
+          Connect the Wallet
+        </button>
+      ) : escrowAgentContext.isNetworkGoerli === undefined ? (
+        <p>Loading</p>
+      ) : escrowAgentContext.isNetworkGoerli === false ? (
+        <p>
+          Logged in as <span className="font-bold	">{shortenAddress(escrowAgentContext.metamaskAccount)} </span>-{" "}
+          <u>Switch to Goerli network</u>
+        </p>
+      ) : (
         <p className="mt-2">
           Logged in as <span className="font-bold	">{shortenAddress(escrowAgentContext.metamaskAccount)}</span>
           {escrowAgentContext.role !== null ? ` (${Role[escrowAgentContext.role]})` : null}
         </p>
-      ) : !escrowAgentContext?.metamaskWallet ? (
-        <p>Metamask Wallet Missing</p>
-      ) : (
-        <button onClick={escrowAgentContext?.connectToWallet} className="border-2 border-[#00d395] px-4 py-1 rounded-2xl mt-4">
-          Connect the Wallet
-        </button>
       )}
     </div>
   );
