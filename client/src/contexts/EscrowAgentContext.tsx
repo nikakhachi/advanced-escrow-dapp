@@ -282,7 +282,7 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
   const approveEscrow = async (escrowId: number) => {
     try {
       const contract = getContract(getSigner());
-      const txn = await contract.ApproveEscrow(escrowId);
+      const txn = await contract.approveEscrow(escrowId);
       await txn.wait();
     } catch (error) {
       console.error(error);
