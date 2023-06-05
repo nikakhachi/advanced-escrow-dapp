@@ -15,8 +15,8 @@ The contract is deployed on Goerli Network- [Etherscan](https://goerli.etherscan
 
 ## Features
 
-- Smart contract deployment and interaction using Hardhat
-- Smart contract tests
+- Smart contract deployment and interaction using Hardhat in Typescript
+- Smart contract tests in Typescript
 - User-friendly interface built with ReactJS in Typescript
 - Web3 integration with EthersJS for seamless interaction with Ethereum network
 
