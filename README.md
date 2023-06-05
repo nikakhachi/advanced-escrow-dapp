@@ -33,7 +33,7 @@ Follow the steps below to get the dApp up and running:
 2. Install the project dependencies by running `npm install` in the root directory as well as in `client` directory.
 3. Configure your MetaMask extension to connect to the desired Ethereum network.
 4. Deploy the smart contracts to the Ethereum network using Hardhat: `npx hardhat run scripts/deploy.js --network <network-name>`.
-5. Update th `ESCROW_ADDRESS` and `ESCROW_ABI` variables in `client/src/contracts/escrow.ts`.
+5. Update the `ESCROW_ADDRESS` variable in `client/src/contracts/escrow.ts`.
 6. Start the client: `cd client && npm run dev`.
 7. Access the dApp by opening your browser and visiting `http://localhost:5173`.
 
