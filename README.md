@@ -15,7 +15,7 @@ The dApp is enabling users to initiate escrows for their transactions. Intermedi
 - Smart contract deployment and interaction using Hardhat
 - Smart contract tests
 - User-friendly interface built with ReactJS in Typescript
-- Web3 integration for seamless interaction with Ethereum network
+- Web3 integration with EthersJS for seamless interaction with Ethereum network
 
 ## Prerequisites
 
