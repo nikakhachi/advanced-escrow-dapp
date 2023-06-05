@@ -2,7 +2,7 @@
 
 The dApp named "SecureTransaction" is enabling users to initiate escrows for their transactions. Intermediary agents handle escrow initiation, cancellation, and rejection. Agents receive a fee from successful escrows and everyone can apply to become an agent once they have been approved by the smart contract owner.
 
-[Etherscan](https://goerli.etherscan.io/address/0xB111c934A6132BB23D56AA4F7cf845bdc453CbC9)
+The contract is deployed on Goerli Network- [Etherscan](https://goerli.etherscan.io/address/0xB111c934A6132BB23D56AA4F7cf845bdc453CbC9)
 
 ## Table of Contents
 
