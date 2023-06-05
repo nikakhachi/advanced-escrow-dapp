@@ -2,6 +2,7 @@ import { FC, useContext } from "react";
 import { EscrowAgentContext } from "../contexts/EscrowAgentContext";
 import { Role } from "../types/enums";
 import { shortenAddress } from "../utils";
+import { ESCROW_ADDRESS } from "../contracts/escrow";
 interface HeaderProps {}
 
 export const Header: FC<HeaderProps> = () => {
@@ -10,7 +11,12 @@ export const Header: FC<HeaderProps> = () => {
   return (
     <div className="w-full justify-center flex flex-col items-center pt-12 pb-12">
       <p className="text-4xl font-semibold text-white">
-        <span className="text-[#00d395]">Escrow</span> Application
+        <span className="text-[#00d395]">Escrow</span> Application{" "}
+        <span className="text-sm underline">
+          <a href={`https://goerli.etherscan.io/address/${ESCROW_ADDRESS}`} target="_blank" rel="noreferrer">
+            (ETHERSCAN)
+          </a>
+        </span>
       </p>
       {!escrowAgentContext?.metamaskWallet ? (
         <p>Metamask Wallet Missing</p>
