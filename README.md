@@ -49,8 +49,8 @@ Follow the steps below to get the dApp up and running:
 To contribute to the development of this dApp, follow the steps below:
 
 1. Fork this repository and clone it to your local machine.
-2. Get the dApp up and running following steps in [Getting Started](#getting-started).
-3. Create a new branch for your changes: `git checkout -b my-new-feature`.
+2. Create a new branch for your changes: `git checkout -b my-new-feature`.
+3. Get the dApp up and running following steps in [Getting Started](#getting-started).
 4. Make the necessary modifications and additions.
 5. Test Smart Contract with `npx hardhat test` in the root directory.
 7. Commit and push your changes: `git commit -m 'Add some feature' && git push origin my-new-feature`.
