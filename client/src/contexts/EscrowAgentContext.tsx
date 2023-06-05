@@ -1,11 +1,10 @@
 import { createContext, useState, PropsWithChildren, useEffect, useContext } from "react";
 import { BigNumber, ethers } from "ethers";
-import { CONTRACT_ADDRESS } from "../constants";
-import CONTRACT_JSON from "../constants/EscrowAgentContract.json";
 import { EscrowStatus, EscrowType } from "../types";
 import { SnackbarContext } from "./SnackbarContext";
 import { Role } from "../types/enums";
 import Decimal from "decimal.js";
+import { ESCROW_ABI, ESCROW_ADDRESS } from "../contracts/escrow";
 
 type EscrowAgentContextType = {
   metamaskWallet: any;
@@ -183,7 +182,7 @@ export const EscrowAgentProvider: React.FC<PropsWithChildren> = ({ children }) =
 
   const getContract = (signer?: ethers.Signer | ethers.providers.Provider): ethers.Contract => {
     if (contract) return contract;
-    const fetchedContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_JSON.abi, signer || publicProvider);
+    const fetchedContract = new ethers.Contract(ESCROW_ADDRESS, ESCROW_ABI, signer || publicProvider);
     if (signer) setContract(fetchedContract);
     return fetchedContract;
   };
