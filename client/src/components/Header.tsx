@@ -11,7 +11,7 @@ export const Header: FC<HeaderProps> = () => {
   return (
     <div className="w-full justify-center flex flex-col items-center pt-12 pb-12">
       <p className="text-4xl font-semibold text-white">
-        <span className="text-[#00d395]">Escrow</span> Application{" "}
+        <span className="text-[#00d395]">Secure</span>Transaction{" "}
         <span className="text-sm underline">
           <a href={`https://goerli.etherscan.io/address/${ESCROW_ADDRESS}`} target="_blank" rel="noreferrer">
             (ETHERSCAN)

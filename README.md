@@ -1,10 +1,11 @@
-# Escrow dApp Application
+# SecureTransaction (Escrow dApp)
 
-The dApp is enabling users to initiate escrows for their transactions. Intermediary agents handle escrow initiation, cancellation, and rejection. Agents receive a fee from successful escrows and everyone can apply to become an agent once they have been approved by the smart contract owner. 
+The dApp is enabling users to initiate escrows for their transactions. Intermediary agents handle escrow initiation, cancellation, and rejection. Agents receive a fee from successful escrows and everyone can apply to become an agent once they have been approved by the smart contract owner.
 
 [Etherscan](https://goerli.etherscan.io/address/0xB111c934A6132BB23D56AA4F7cf845bdc453CbC9)
 
 ## Table of Contents
+
 - [Features](#features)
 - [Prerequisites](#prerequisites)
 - [Getting Started](#getting-started)
@@ -55,8 +56,8 @@ To contribute to the development of this dApp, follow the steps below:
 3. Get the dApp up and running following steps in [Getting Started](#getting-started).
 4. Make the necessary modifications and additions.
 5. Test Smart Contract with `npx hardhat test` in the root directory.
-7. Commit and push your changes: `git commit -m 'Add some feature' && git push origin my-new-feature`.
-8. Submit a pull request detailing your changes and their benefits.
+6. Commit and push your changes: `git commit -m 'Add some feature' && git push origin my-new-feature`.
+7. Submit a pull request detailing your changes and their benefits.
 
 ## Contact
 
