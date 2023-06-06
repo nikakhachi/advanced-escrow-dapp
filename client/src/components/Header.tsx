@@ -11,12 +11,18 @@ export const Header: FC<HeaderProps> = () => {
   return (
     <div className="w-full justify-center flex flex-col items-center pt-12 pb-12">
       <p className="text-4xl font-semibold text-white">
-        <span className="text-[#00d395]">Secure</span>Transaction{" "}
-        <span className="text-sm underline">
-          <a href={`https://goerli.etherscan.io/address/${ESCROW_ADDRESS}`} target="_blank" rel="noreferrer">
-            (ETHERSCAN)
-          </a>
-        </span>
+        <span className="text-[#00d395]">Secure</span>Transaction
+      </p>
+      <p>
+        (
+        <a className="text-sm underline" href={`https://goerli.etherscan.io/address/${ESCROW_ADDRESS}`} target="_blank" rel="noreferrer">
+          ETHERSCAN
+        </a>
+        ,
+        <a className="text-sm underline" href="https://github.com/nikakhachi/advanced-escrow-dapp" target="_blank" rel="noreferrer">
+          GITHUB
+        </a>
+        )
       </p>
       {!escrowAgentContext?.metamaskWallet ? (
         <p>Metamask Wallet Missing</p>
